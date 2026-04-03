@@ -1,0 +1,33 @@
+.piece-template {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 3rem;
+}
+
+.piece-template__card {
+  max-width: 32rem;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.piece-template__eyebrow {
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.72rem;
+}
+
+.piece-template__card h2 {
+  margin-bottom: 0.75rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.piece-template__card p:last-child {
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+}

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <rect width="320" height="200" rx="28" fill="#151515" />
+  <rect x="26" y="26" width="268" height="148" rx="18" fill="none" stroke="#9f8f6b" stroke-width="1.5" stroke-dasharray="8 7" />
+  <text x="38" y="164" fill="#f3efe8" font-family="Manrope, sans-serif" font-size="18" letter-spacing="5">TEMPLATE</text>
+</svg>

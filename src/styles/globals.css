@@ -1,0 +1,296 @@
+:root {
+  font-family:
+    'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont,
+    'Segoe UI Variable Text', 'Segoe UI', sans-serif;
+  color-scheme: light;
+  color: #27303c;
+  background: #f1f4f8;
+  --shell-font-ui:
+    'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont,
+    'Segoe UI Variable Text', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --shell-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --shell-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --shell-ease-press: cubic-bezier(0.34, 1.24, 0.64, 1);
+  --shell-duration-fast: 120ms;
+  --shell-duration-mid: 180ms;
+  --shell-duration-slow: 240ms;
+  --shell-bg: #f1f4f8;
+  --shell-bg-top: #fbfcfe;
+  --shell-bg-bottom: #e5ebf2;
+  --shell-desktop-glow: rgba(255, 255, 255, 0.82);
+  --shell-dot: rgba(70, 87, 115, 0.052);
+  --shell-dot-active: rgba(110, 133, 178, 0.16);
+  --shell-surface-air:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(244, 248, 253, 0.18)),
+    rgba(242, 247, 252, 0.28);
+  --shell-surface-float:
+    radial-gradient(circle at 50% -6%, rgba(255, 255, 255, 0.74), transparent 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(237, 243, 250, 0.52)),
+    rgba(228, 235, 244, 0.8);
+  --shell-surface-chrome:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(243, 248, 253, 0.56)),
+    rgba(243, 247, 252, 0.88);
+  --shell-surface-navigation:
+    linear-gradient(180deg, rgba(243, 247, 252, 0.96), rgba(232, 238, 245, 0.88)),
+    rgba(231, 237, 244, 0.92);
+  --shell-surface-paper:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.995), rgba(248, 251, 254, 0.995)),
+    rgba(249, 251, 254, 0.995);
+  --shell-surface-paper-muted:
+    linear-gradient(180deg, rgba(246, 249, 253, 0.98), rgba(239, 244, 249, 0.99)),
+    rgba(241, 245, 250, 0.99);
+  --shell-air-border: rgba(255, 255, 255, 0.58);
+  --shell-air-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.76),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+  --shell-float-border: rgba(255, 255, 255, 0.64);
+  --shell-float-shadow:
+    0 20px 42px rgba(66, 80, 104, 0.112),
+    0 8px 20px rgba(66, 80, 104, 0.064),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+  --shell-chrome-border: rgba(82, 98, 126, 0.18);
+  --shell-chrome-shadow:
+    0 28px 60px rgba(66, 80, 104, 0.112),
+    0 10px 24px rgba(66, 80, 104, 0.064),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.16);
+  --shell-divider: rgba(70, 87, 113, 0.1);
+  --shell-divider-strong: rgba(70, 87, 113, 0.16);
+  --shell-divider-stronger: rgba(70, 87, 113, 0.24);
+  --shell-glass-highlight: rgba(255, 255, 255, 0.86);
+  --shell-glass-edge: rgba(255, 255, 255, 0.56);
+  --shell-window: rgba(255, 255, 255, 0.7);
+  --shell-window-body: rgba(250, 252, 255, 0.95);
+  --shell-window-chrome: rgba(246, 249, 253, 0.76);
+  --shell-sidebar: rgba(240, 244, 248, 0.74);
+  --shell-window-border: var(--shell-chrome-border);
+  --shell-window-shadow: var(--shell-chrome-shadow);
+  --shell-line: var(--shell-divider);
+  --shell-line-strong: var(--shell-divider-strong);
+  --shell-line-stronger: var(--shell-divider-stronger);
+  --shell-text: rgba(31, 39, 52, 0.92);
+  --shell-text-strong: rgba(18, 23, 31, 0.98);
+  --shell-text-soft: rgba(86, 98, 118, 0.74);
+  --shell-control-surface:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(239, 245, 251, 0.68)),
+    rgba(243, 248, 252, 0.92);
+  --shell-control-bg: rgba(255, 255, 255, 0.62);
+  --shell-control-bg-strong: rgba(255, 255, 255, 0.78);
+  --shell-control-hover: rgba(255, 255, 255, 0.94);
+  --shell-control-active: rgba(231, 238, 247, 0.98);
+  --shell-control-border: rgba(84, 100, 125, 0.14);
+  --shell-control-shadow:
+    0 8px 18px rgba(89, 103, 130, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.76);
+  --shell-dock-bg: rgba(228, 235, 244, 0.76);
+  --shell-dock-border: rgba(255, 255, 255, 0.64);
+  --shell-dock-shadow: var(--shell-float-shadow);
+  --shell-dock-icon: rgba(31, 39, 52, 0.94);
+  --shell-dock-icon-soft: rgba(98, 109, 127, 0.4);
+  --shell-dock-hover: rgba(255, 255, 255, 0.28);
+  --shell-dock-active: rgba(255, 255, 255, 0.42);
+  --shell-dock-piece-stroke: rgba(87, 106, 140, 0.12);
+  --shell-selection: rgba(119, 144, 190, 0.18);
+  --shell-selection-strong: rgba(119, 144, 190, 0.28);
+  --shell-selection-border: rgba(255, 255, 255, 0.66);
+  --shell-row-hover: rgba(82, 100, 127, 0.082);
+  --shell-indicator: rgba(76, 91, 118, 0.74);
+  --shell-focus-ring: rgba(116, 150, 212, 0.22);
+  --shell-icon-neutral: rgba(86, 99, 118, 0.22);
+  --shell-icon-neutral-strong: rgba(67, 77, 94, 0.4);
+  --shell-icon-hover-glow: rgba(255, 255, 255, 0.68);
+  --shell-icon-active-glow: rgba(255, 255, 255, 0.84);
+  --shell-folder-top: #d4e2fc;
+  --shell-folder-top-2: #c8d8f8;
+  --shell-folder-body: #96b8ee;
+  --shell-folder-body-2: #85a9e2;
+  --shell-folder-edge: #7ea0d8;
+  --shell-folder-edge-2: #7192ca;
+  --shell-folder-top-selected: #dce8ff;
+  --shell-folder-top-selected-2: #cfe0ff;
+  --shell-folder-body-selected: #a4c2f8;
+  --shell-folder-body-selected-2: #8fb2ec;
+  --shell-folder-edge-selected: #88a8df;
+  --shell-folder-edge-selected-2: #7b99d1;
+  --shell-folder-stroke: rgba(65, 96, 150, 0.18);
+  --shell-folder-highlight: rgba(255, 255, 255, 0.88);
+  --shell-folder-sheen: rgba(255, 255, 255, 0.58);
+  --shell-folder-shadow: rgba(80, 109, 160, 0.2);
+  --shell-folder-hover-top: #d9e5ff;
+  --shell-folder-hover-top-2: #cfdeff;
+  --shell-folder-hover-body: #a3c0f7;
+  --shell-folder-hover-body-2: #90b2eb;
+  --shell-folder-hover-edge: #8aabdf;
+  --shell-folder-hover-edge-2: #7a9ace;
+  --shell-folder-hover-stroke: rgba(74, 105, 160, 0.2);
+  --shell-folder-hover-highlight: rgba(255, 255, 255, 0.92);
+  --shell-folder-hover-sheen: rgba(255, 255, 255, 0.66);
+  --shell-folder-hover-shadow: rgba(88, 112, 156, 0.2);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  color: #e3e8f1;
+  background: #11161e;
+  --shell-bg: #11161e;
+  --shell-bg-top: #171e28;
+  --shell-bg-bottom: #0c1219;
+  --shell-desktop-glow: rgba(176, 193, 226, 0.12);
+  --shell-dot: rgba(201, 212, 232, 0.048);
+  --shell-dot-active: rgba(151, 176, 226, 0.118);
+  --shell-surface-air:
+    linear-gradient(180deg, rgba(42, 54, 70, 0.56), rgba(17, 23, 31, 0.12)),
+    rgba(18, 25, 34, 0.24);
+  --shell-surface-float:
+    radial-gradient(circle at 50% -8%, rgba(200, 216, 244, 0.16), transparent 58%),
+    linear-gradient(180deg, rgba(38, 49, 66, 0.74), rgba(20, 27, 37, 0.6)),
+    rgba(21, 28, 39, 0.82);
+  --shell-surface-chrome:
+    linear-gradient(180deg, rgba(38, 49, 66, 0.82), rgba(22, 30, 40, 0.7)),
+    rgba(20, 27, 38, 0.92);
+  --shell-surface-navigation:
+    linear-gradient(180deg, rgba(35, 44, 59, 0.92), rgba(23, 31, 42, 0.9)),
+    rgba(21, 29, 39, 0.94);
+  --shell-surface-paper:
+    linear-gradient(180deg, rgba(26, 34, 46, 0.995), rgba(16, 23, 32, 0.995)),
+    rgba(17, 24, 33, 0.995);
+  --shell-surface-paper-muted:
+    linear-gradient(180deg, rgba(29, 37, 50, 0.98), rgba(18, 25, 35, 0.99)),
+    rgba(20, 27, 37, 0.99);
+  --shell-air-border: rgba(205, 219, 245, 0.14);
+  --shell-air-shadow:
+    inset 0 1px 0 rgba(224, 233, 252, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.24);
+  --shell-float-border: rgba(206, 221, 247, 0.18);
+  --shell-float-shadow:
+    0 24px 50px rgba(0, 0, 0, 0.368),
+    0 10px 24px rgba(0, 0, 0, 0.224),
+    inset 0 1px 0 rgba(221, 231, 252, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.24);
+  --shell-chrome-border: rgba(198, 213, 238, 0.16);
+  --shell-chrome-shadow:
+    0 30px 64px rgba(0, 0, 0, 0.336),
+    0 12px 26px rgba(0, 0, 0, 0.192),
+    inset 0 1px 0 rgba(221, 231, 252, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+  --shell-divider: rgba(198, 213, 238, 0.1);
+  --shell-divider-strong: rgba(198, 213, 238, 0.16);
+  --shell-divider-stronger: rgba(198, 213, 238, 0.24);
+  --shell-glass-highlight: rgba(235, 242, 255, 0.22);
+  --shell-glass-edge: rgba(223, 233, 252, 0.16);
+  --shell-window: rgba(28, 35, 46, 0.82);
+  --shell-window-body: rgba(24, 31, 41, 0.96);
+  --shell-window-chrome: rgba(35, 44, 58, 0.8);
+  --shell-sidebar: rgba(32, 40, 53, 0.78);
+  --shell-text: rgba(227, 233, 244, 0.9);
+  --shell-text-strong: rgba(248, 250, 255, 0.98);
+  --shell-text-soft: rgba(170, 181, 201, 0.76);
+  --shell-control-surface:
+    linear-gradient(180deg, rgba(56, 69, 92, 0.68), rgba(25, 33, 45, 0.52)),
+    rgba(29, 38, 50, 0.84);
+  --shell-control-bg: rgba(42, 52, 68, 0.56);
+  --shell-control-bg-strong: rgba(52, 64, 84, 0.68);
+  --shell-control-hover: rgba(76, 92, 118, 0.82);
+  --shell-control-active: rgba(89, 106, 136, 0.92);
+  --shell-control-border: rgba(201, 214, 238, 0.16);
+  --shell-control-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(223, 233, 252, 0.14);
+  --shell-dock-bg: rgba(29, 38, 50, 0.86);
+  --shell-dock-border: rgba(221, 231, 252, 0.18);
+  --shell-dock-icon: rgba(234, 240, 250, 0.96);
+  --shell-dock-icon-soft: rgba(183, 193, 210, 0.42);
+  --shell-dock-hover: rgba(212, 224, 248, 0.16);
+  --shell-dock-active: rgba(226, 236, 255, 0.2);
+  --shell-selection: rgba(126, 152, 203, 0.24);
+  --shell-selection-strong: rgba(126, 152, 203, 0.36);
+  --shell-selection-border: rgba(228, 236, 252, 0.22);
+  --shell-row-hover: rgba(204, 216, 240, 0.1);
+  --shell-indicator: rgba(189, 200, 220, 0.74);
+  --shell-focus-ring: rgba(126, 152, 203, 0.26);
+  --shell-icon-neutral: rgba(178, 189, 207, 0.22);
+  --shell-icon-neutral-strong: rgba(201, 211, 228, 0.38);
+  --shell-icon-hover-glow: rgba(222, 232, 252, 0.18);
+  --shell-icon-active-glow: rgba(233, 240, 255, 0.24);
+  --shell-folder-top: #5873a6;
+  --shell-folder-top-2: #516897;
+  --shell-folder-body: #4c6798;
+  --shell-folder-body-2: #455d88;
+  --shell-folder-edge: #718dc3;
+  --shell-folder-edge-2: #607aa9;
+  --shell-folder-top-selected: #6984b6;
+  --shell-folder-top-selected-2: #6077a6;
+  --shell-folder-body-selected: #5d79ad;
+  --shell-folder-body-selected-2: #536d9c;
+  --shell-folder-edge-selected: #7f9ad0;
+  --shell-folder-edge-selected-2: #6b85b6;
+  --shell-folder-stroke: rgba(190, 208, 240, 0.16);
+  --shell-folder-highlight: rgba(238, 244, 255, 0.22);
+  --shell-folder-sheen: rgba(238, 244, 255, 0.14);
+  --shell-folder-shadow: rgba(8, 10, 16, 0.24);
+  --shell-folder-hover-top: #6e89ba;
+  --shell-folder-hover-top-2: #657eae;
+  --shell-folder-hover-body: #6380b5;
+  --shell-folder-hover-body-2: #5973a4;
+  --shell-folder-hover-edge: #86a1d6;
+  --shell-folder-hover-edge-2: #7089ba;
+  --shell-folder-hover-stroke: rgba(204, 219, 246, 0.18);
+  --shell-folder-hover-highlight: rgba(244, 248, 255, 0.28);
+  --shell-folder-hover-sheen: rgba(244, 248, 255, 0.18);
+  --shell-folder-hover-shadow: rgba(8, 10, 16, 0.28);
+}
+
+html {
+  background: var(--shell-bg);
+}
+
+body {
+  background-color: var(--shell-bg);
+  color: var(--shell-text);
+}
+
+body[data-piece-mode='shell'] {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top, var(--shell-desktop-glow), transparent 34%),
+    radial-gradient(circle at 20% 100%, rgba(224, 231, 239, 0.22), transparent 38%),
+    linear-gradient(180deg, var(--shell-bg-top) 0%, var(--shell-bg-bottom) 100%);
+}
+
+body[data-piece-mode='hosted'] {
+  background:
+    radial-gradient(circle at top left, rgba(214, 199, 170, 0.18), transparent 32%),
+    linear-gradient(180deg, #f8f4ed 0%, #eee6d8 100%);
+  color: rgba(23, 19, 15, 0.82);
+}
+
+body[data-piece-mode='isolated'] {
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.7), transparent 36%),
+    linear-gradient(180deg, #f7f9fc 0%, #edf2f7 100%);
+  color: #2a3240;
+}
+
+:root[data-theme='dark'] body[data-piece-mode='hosted'] {
+  background:
+    radial-gradient(circle at top left, rgba(128, 112, 88, 0.14), transparent 30%),
+    linear-gradient(180deg, #181c22 0%, #10151c 100%);
+  color: rgba(226, 232, 242, 0.88);
+}
+
+:root[data-theme='dark'] body[data-piece-mode='isolated'] {
+  background:
+    radial-gradient(circle at top, rgba(176, 193, 226, 0.08), transparent 30%),
+    linear-gradient(180deg, #10151d 0%, #0b1017 100%);
+  color: #e3e8f1;
+}
+
+#root {
+  min-height: 100svh;
+  isolation: isolate;
+}
+
+::selection {
+  background: rgba(118, 168, 255, 0.24);
+}
