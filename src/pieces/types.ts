@@ -26,4 +26,9 @@ export interface PieceMeta extends PieceManifest {
   importer: PieceImporter
 }
 
+export type PublicProjectEntry = Pick<
+  PieceMeta,
+  'slug' | 'title' | 'description' | 'order' | 'importer'
+>
+
 export type LazyPieceComponent = LazyExoticComponent<ComponentType<PieceComponentProps>>

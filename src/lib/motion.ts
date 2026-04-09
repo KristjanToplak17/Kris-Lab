@@ -16,6 +16,8 @@ export function getPageReveal(reducedMotion: boolean) {
   }
 }
 
-export function getListReveal(_reducedMotion: boolean, _index: number) {
+export function getListReveal(reducedMotion: boolean, index: number) {
+  void reducedMotion
+  void index
   return {}
 }

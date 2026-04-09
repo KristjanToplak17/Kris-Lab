@@ -258,34 +258,6 @@ body[data-piece-mode='shell'] {
     linear-gradient(180deg, var(--shell-bg-top) 0%, var(--shell-bg-bottom) 100%);
 }
 
-body[data-piece-mode='hosted'] {
-  background:
-    radial-gradient(circle at top left, rgba(214, 199, 170, 0.18), transparent 32%),
-    linear-gradient(180deg, #f8f4ed 0%, #eee6d8 100%);
-  color: rgba(23, 19, 15, 0.82);
-}
-
-body[data-piece-mode='isolated'] {
-  background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.7), transparent 36%),
-    linear-gradient(180deg, #f7f9fc 0%, #edf2f7 100%);
-  color: #2a3240;
-}
-
-:root[data-theme='dark'] body[data-piece-mode='hosted'] {
-  background:
-    radial-gradient(circle at top left, rgba(128, 112, 88, 0.14), transparent 30%),
-    linear-gradient(180deg, #181c22 0%, #10151c 100%);
-  color: rgba(226, 232, 242, 0.88);
-}
-
-:root[data-theme='dark'] body[data-piece-mode='isolated'] {
-  background:
-    radial-gradient(circle at top, rgba(176, 193, 226, 0.08), transparent 30%),
-    linear-gradient(180deg, #10151d 0%, #0b1017 100%);
-  color: #e3e8f1;
-}
-
 #root {
   min-height: 100svh;
   isolation: isolate;

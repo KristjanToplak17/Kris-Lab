@@ -8,8 +8,8 @@ export function createLabNavigationState(): LabNavigationState {
   return { fromLab: true }
 }
 
-export function getPiecePath(slug: string): string {
-  return `/piece/${slug}`
+export function getProjectPath(slug: string): string {
+  return `/project/${slug}`
 }
 
 export function navigateToShell(

@@ -59,6 +59,7 @@
 .shell-system-bar,
 .shell-dock {
   width: 100%;
+  z-index: 2;
 }
 
 .shell-system-bar {
@@ -119,47 +120,66 @@
   width: 100%;
   min-height: 0;
   align-self: stretch;
-  display: grid;
 }
 
-.shell-route__canvas {
-  position: relative;
+.shell-route__desktop {
+  position: absolute;
+  inset-inline: 0;
+  z-index: 1;
+}
+
+.shell-desktop__window-frame {
+  position: absolute;
+  min-width: 0;
+  min-height: 0;
+  pointer-events: auto;
+  transition:
+    left 160ms var(--shell-ease-out),
+    top 160ms var(--shell-ease-out),
+    width 160ms var(--shell-ease-out),
+    height 160ms var(--shell-ease-out);
+}
+
+.shell-desktop__window-frame.is-dragging {
+  transition: none;
+}
+
+.shell-desktop__window-frame .shell-window,
+.shell-desktop__window-frame .about-window,
+.shell-desktop__window-frame .project-window {
   width: 100%;
   height: 100%;
-  display: grid;
-  place-items: center;
+  max-height: none;
+  min-height: 0;
+  transition:
+    box-shadow 160ms var(--shell-ease-out),
+    border-color 160ms var(--shell-ease-out),
+    opacity 160ms var(--shell-ease-out);
 }
 
-.shell-route__finder-layer {
-  width: min(calc(100% - (var(--shell-viewport-padding-inline) * 2)), var(--shell-frame-width));
-  min-width: 0;
-  display: grid;
-  place-items: center;
+.shell-desktop__window-frame.is-inactive .shell-window,
+.shell-desktop__window-frame.is-inactive .about-window,
+.shell-desktop__window-frame.is-inactive .project-window {
+  border-color: color-mix(in srgb, var(--shell-window-border) 82%, rgba(255, 255, 255, 0.08));
+  box-shadow:
+    0 18px 38px rgba(38, 46, 60, 0.18),
+    0 8px 18px rgba(38, 46, 60, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
-.shell-route__project-layer {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  z-index: 2;
-  padding:
-    calc(env(safe-area-inset-top, 0px) + clamp(0.72rem, 1.4vw, 1.1rem))
-    max(env(safe-area-inset-right, 0px), clamp(0.72rem, 1.4vw, 1.1rem))
-    calc(env(safe-area-inset-bottom, 0px) + 7rem)
-    max(env(safe-area-inset-left, 0px), clamp(0.72rem, 1.4vw, 1.1rem));
-  pointer-events: none;
+.shell-desktop__window-frame.is-inactive .shell-window__title {
+  color: color-mix(in srgb, var(--shell-text-soft) 78%, rgba(126, 138, 160, 0.72) 22%);
 }
 
 .shell-window {
   position: relative;
   isolation: isolate;
   width: 100%;
-  height: min(var(--shell-window-height), 76svh);
-  max-height: min(var(--shell-window-height), 76svh);
-  min-height: min(var(--shell-window-height), 76svh);
+  height: 100%;
+  max-height: none;
+  min-height: 0;
   display: grid;
-  grid-template-rows: 2.08rem 2.78rem minmax(0, 1fr);
+  grid-template-rows: 1.75rem 2.78rem minmax(0, 1fr);
   overflow: hidden;
   border: 1px solid var(--shell-window-border);
   border-radius: 1.18rem;
@@ -223,8 +243,29 @@
   padding: 0 0.98rem;
   border-bottom: 1px solid var(--shell-line);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05)),
-    color-mix(in srgb, var(--shell-surface-chrome) 68%, var(--shell-surface-navigation) 32%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04)),
+    color-mix(in srgb, var(--shell-surface-chrome) 72%, var(--shell-surface-navigation) 28%);
+}
+
+[data-window-drag-handle] {
+  cursor: grab;
+  touch-action: none;
+}
+
+.shell-route[data-window-dragging='true'] [data-window-drag-handle] {
+  cursor: grabbing;
+}
+
+[data-window-control] {
+  cursor: default;
+}
+
+button[data-window-control] {
+  cursor: pointer;
+}
+
+body[data-window-dragging='true'] {
+  user-select: none;
 }
 
 .shell-window__traffic {
@@ -430,15 +471,15 @@ button.shell-window__traffic-light:focus-visible {
 .shell-toolbar__view-controls {
   display: inline-flex;
   align-items: center;
-  padding: 0.18rem;
-  border: 1px solid color-mix(in srgb, var(--shell-control-border) 94%, var(--shell-line-strong) 6%);
+  padding: 0.14rem;
+  border: 1px solid color-mix(in srgb, var(--shell-control-border) 78%, transparent);
   border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--shell-control-surface) 92%, var(--shell-surface-paper-muted) 8%);
+  background: color-mix(in srgb, var(--shell-control-surface) 78%, transparent);
   box-shadow:
-    0 10px 20px rgba(89, 103, 130, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.76);
-  backdrop-filter: blur(14px) saturate(146%);
-  -webkit-backdrop-filter: blur(14px) saturate(146%);
+    0 2px 6px rgba(89, 103, 130, 0.035),
+    inset 0 1px 0 rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(10px) saturate(132%);
+  -webkit-backdrop-filter: blur(10px) saturate(132%);
 }
 
 .shell-view-toggle {
@@ -478,11 +519,11 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-view-toggle__button.is-active {
-  background: color-mix(in srgb, var(--shell-selection-strong) 54%, var(--shell-control-hover) 46%);
-  border-color: color-mix(in srgb, var(--shell-control-border) 98%, transparent);
+  background: color-mix(in srgb, var(--shell-selection-strong) 38%, var(--shell-control-hover) 62%);
+  border-color: color-mix(in srgb, var(--shell-control-border) 82%, transparent);
   box-shadow:
-    0 1px 2px rgba(101, 118, 148, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.58);
+    0 1px 2px rgba(101, 118, 148, 0.045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
   color: var(--shell-text-strong);
 }
 
@@ -525,15 +566,16 @@ button.shell-window__traffic-light:focus-visible {
 .shell-sidebar {
   min-height: 0;
   padding: 0.92rem 0.54rem 0.9rem 0.72rem;
-  border-right: 1px solid var(--shell-line);
+  border-right: 1px solid color-mix(in srgb, var(--shell-line) 82%, transparent);
   background:
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--shell-surface-navigation) 98%, white 2%),
-      color-mix(in srgb, var(--shell-surface-navigation) 92%, var(--shell-surface-paper-muted) 8%)
+      color-mix(in srgb, var(--shell-surface-navigation) 96%, white 4%),
+      color-mix(in srgb, var(--shell-surface-navigation) 86%, var(--shell-surface-paper-muted) 14%)
     );
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(16px) saturate(134%);
+  -webkit-backdrop-filter: blur(16px) saturate(134%);
 }
 
 .shell-sidebar__nav,
@@ -588,9 +630,10 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-sidebar__item-icon {
-  width: 0.94rem;
-  height: 0.94rem;
-  color: var(--shell-text-soft);
+  display: block;
+  width: 0.98rem;
+  height: 0.98rem;
+  color: color-mix(in srgb, var(--shell-text-soft) 82%, var(--shell-text) 18%);
   flex: none;
 }
 
@@ -1021,6 +1064,66 @@ button.shell-window__traffic-light:focus-visible {
   padding: 0;
 }
 
+.about-window-shell {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  pointer-events: auto;
+}
+
+.about-window {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 1.75rem minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--shell-window-border);
+  border-radius: 1.18rem;
+  background: var(--shell-surface-paper);
+  box-shadow: var(--shell-window-shadow);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.about-window__titlebar {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 248, 252, 0.94)),
+    rgba(246, 249, 253, 0.98);
+}
+
+.about-window__traffic {
+  align-self: center;
+}
+
+.about-window__close {
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  transition: box-shadow var(--shell-duration-mid) var(--shell-ease-out);
+}
+
+.about-window__close:focus-visible {
+  box-shadow: 0 0 0 3px var(--shell-focus-ring);
+  outline: none;
+}
+
+.about-window__stage {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--shell-surface-paper) 96%, white 4%);
+  border-radius: 0 0 inherit inherit;
+}
+
+.about-window__stage > .shell-document {
+  height: 100%;
+}
+
 .shell-document {
   height: 100%;
   display: grid;
@@ -1183,12 +1286,11 @@ button.shell-window__traffic-light:focus-visible {
   --shell-dock-frame-size: calc(2.98rem * var(--shell-dock-scale));
   --shell-dock-frame-radius: calc(0.96rem * var(--shell-dock-scale));
   --shell-dock-frame-inset: calc(0.18rem * var(--shell-dock-scale));
-  --shell-dock-finder-size: calc(2.22rem * var(--shell-dock-scale));
+  --shell-dock-launcher-size: calc(2.22rem * var(--shell-dock-scale));
   --shell-dock-indicator-size: calc(0.25rem * var(--shell-dock-scale));
   --shell-dock-hover-lift: -0.375rem;
   --shell-dock-hover-scale: 1.08;
   --shell-dock-press-scale: 0.96;
-  --shell-dock-future-inset: calc(0.5rem * var(--shell-dock-scale));
   pointer-events: auto;
   min-height: var(--shell-dock-min-height);
   display: inline-flex;
@@ -1289,28 +1391,6 @@ button.shell-window__traffic-light:focus-visible {
     border-color var(--shell-duration-fast) ease;
 }
 
-.shell-dock__button--future .shell-dock__icon-frame {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.64), rgba(232, 238, 246, 0.48));
-  box-shadow:
-    0 9px 20px rgba(77, 90, 112, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.74),
-    inset 0 -1px 0 rgba(148, 167, 194, 0.12);
-}
-
-.shell-dock__button--future .shell-dock__icon-frame::after {
-  content: '';
-  position: absolute;
-  inset: var(--shell-dock-future-inset);
-  border-radius: calc(var(--shell-dock-frame-radius) - (0.22rem * var(--shell-dock-scale)));
-  border: 1px solid rgba(164, 179, 203, 0.26);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(230, 237, 245, 0.06));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.36),
-    inset 0 -1px 0 rgba(154, 171, 196, 0.08);
-}
-
 .shell-dock__button:focus-visible .shell-dock__icon-frame {
   box-shadow: 0 0 0 3px var(--shell-focus-ring);
 }
@@ -1396,9 +1476,9 @@ button.shell-window__traffic-light:focus-visible {
   transform: translateX(-50%) rotate(45deg);
 }
 
-.shell-dock__finder {
-  width: var(--shell-dock-finder-size);
-  height: var(--shell-dock-finder-size);
+.shell-dock__launcher {
+  width: var(--shell-dock-launcher-size);
+  height: var(--shell-dock-launcher-size);
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.26));
 }
 
@@ -1644,11 +1724,6 @@ button.shell-window__traffic-light:focus-visible {
     border-color: color-mix(in srgb, var(--shell-dock-border) 88%, rgba(151, 169, 194, 0.14));
   }
 
-  .shell-dock__button--future:hover .shell-dock__icon-frame::after,
-  .shell-dock__button--future:focus-visible .shell-dock__icon-frame::after {
-    border-color: rgba(156, 173, 199, 0.34);
-  }
-
   .shell-not-found__link:hover {
     border-color: var(--shell-line-stronger);
     background: var(--shell-control-hover);
@@ -1697,10 +1772,11 @@ button.shell-window__traffic-light:focus-visible {
   }
 
   .shell-window {
-    height: min(100%, 39rem);
-    max-height: min(100%, 92svh);
-    min-height: 29rem;
     grid-template-rows: 1.98rem 2.42rem minmax(0, 1fr);
+    border-radius: 1rem;
+  }
+
+  .about-window {
     border-radius: 1rem;
   }
 
@@ -1715,9 +1791,8 @@ button.shell-window__traffic-light:focus-visible {
     --shell-dock-button-height: calc(3.34rem * var(--shell-dock-scale));
     --shell-dock-row-gap: calc(0.24rem * var(--shell-dock-scale));
     --shell-dock-frame-size: calc(2.34rem * var(--shell-dock-scale));
-    --shell-dock-finder-size: calc(1.74rem * var(--shell-dock-scale));
+    --shell-dock-launcher-size: calc(1.74rem * var(--shell-dock-scale));
     --shell-dock-hover-lift: -0.28rem;
-    --shell-dock-future-inset: calc(0.4rem * var(--shell-dock-scale));
   }
 
   .shell-window__content {
@@ -1799,6 +1874,10 @@ button.shell-window__traffic-light:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   .shell-route::after,
+  .shell-desktop__window-frame,
+  .shell-desktop__window-frame .shell-window,
+  .shell-desktop__window-frame .about-window,
+  .shell-desktop__window-frame .project-window,
   .shell-toolbar__back,
   .shell-view-toggle__button,
   .shell-sidebar__item,
@@ -1813,6 +1892,7 @@ button.shell-window__traffic-light:focus-visible {
   .shell-window__traffic-light,
   .shell-window__traffic-light::before,
   .shell-window__traffic-light::after,
+  .about-window__close,
   .shell-dock__tooltip,
   .shell-not-found__link {
     transition: none;

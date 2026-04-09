@@ -10,22 +10,22 @@ export function ShellNotFoundState({
   missingProjectSlug = null,
   onReturn,
 }: ShellNotFoundStateProps) {
-  const requestedPath = missingProjectSlug ? `/piece/${missingProjectSlug}` : null
+  const requestedPath = missingProjectSlug ? `/project/${missingProjectSlug}` : null
 
   return (
     <div className="shell-not-found shell-not-found--embedded">
       <div className="shell-not-found__card">
         <p className="shell-not-found__eyebrow">
-          {missingProjectSlug ? 'Experiment unavailable' : 'Not found'}
+          {missingProjectSlug ? 'Project unavailable' : 'Not found'}
         </p>
         <h1>
           {missingProjectSlug
-            ? 'This experiment is not part of the lab.'
+            ? 'This project is not part of the lab.'
             : 'This route is not part of the lab.'}
         </h1>
         <p>
-          The shell only exposes approved pieces, and this path does not map to a
-          registered experiment.
+          The shell only exposes public projects, and this path does not map to a
+          registered project.
         </p>
         {requestedPath ? (
           <p className="shell-not-found__meta">
@@ -39,7 +39,7 @@ export function ShellNotFoundState({
             className="shell-not-found__link"
             onClick={onReturn}
           >
-            View experiments
+            View projects
           </button>
         ) : (
           <Link className="shell-not-found__link" to="/">

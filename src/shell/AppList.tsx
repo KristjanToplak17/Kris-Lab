@@ -1,22 +1,22 @@
 import { motion } from 'motion/react'
 import { getListReveal } from '../lib/motion'
 import { usePrefersReducedMotion } from '../lib/reduced-motion'
-import type { PieceMeta } from '../pieces/types'
+import type { PublicProjectEntry } from '../pieces/types'
 
 interface AppListProps {
-  pieces: PieceMeta[]
-  onOpenPiece: (piece: PieceMeta) => void
+  pieces: PublicProjectEntry[]
+  onOpenProject: (project: PublicProjectEntry) => void
 }
 
-export function AppList({ pieces, onOpenPiece }: AppListProps) {
+export function AppList({ pieces, onOpenProject }: AppListProps) {
   const reducedMotion = usePrefersReducedMotion()
 
   if (!pieces.length) {
     return (
       <div className="shell-list__empty-state">
-        <p className="shell-list__empty">No approved experiments are available yet.</p>
+        <p className="shell-list__empty">No public projects are available yet.</p>
         <p className="shell-list__empty-copy">
-          Approved work will appear here once a piece is ready for the shell.
+          Public projects will appear here once a project is ready for the shell.
         </p>
       </div>
     )
@@ -34,7 +34,7 @@ export function AppList({ pieces, onOpenPiece }: AppListProps) {
             type="button"
             className="shell-list__link shell-list__link--button shell-list__link--document-row"
             onClick={() => {
-              onOpenPiece(piece)
+              onOpenProject(piece)
             }}
             onFocus={() => {
               void piece.importer()

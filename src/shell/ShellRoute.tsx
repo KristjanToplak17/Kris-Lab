@@ -1,25 +1,24 @@
 import { useEffect } from 'react'
-import { useMatch } from 'react-router-dom'
-import { getApprovedPieces, getPieceBySlug } from '../pieces/registry'
+import { useParams } from 'react-router-dom'
+import { getPublicProjectBySlug, getPublicProjects } from '../pieces/registry'
 import { ShellLayout } from './ShellLayout'
 
 export function ShellRoute() {
-  const projectMatch = useMatch('/piece/:slug')
-  const slug = projectMatch?.params.slug
-  const activeProject = slug ? getPieceBySlug(slug) ?? null : null
+  const { slug } = useParams<{ slug?: string }>()
+  const activeProject = slug ? getPublicProjectBySlug(slug) ?? null : null
   const missingProjectSlug = slug && !activeProject ? slug : null
 
   useEffect(() => {
     document.title = activeProject
       ? `${activeProject.title} - Kris' Lab`
       : missingProjectSlug
-        ? `Experiment unavailable - Kris' Lab`
+        ? `Project unavailable - Kris' Lab`
         : "Kris' Lab"
   }, [activeProject, missingProjectSlug])
 
   return (
     <ShellLayout
-      pieces={getApprovedPieces()}
+      pieces={getPublicProjects()}
       activeProject={activeProject}
       missingProjectSlug={missingProjectSlug}
     />

@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, redirect } from 'react-router-dom'
 
 export const router = createBrowserRouter([
   {
@@ -7,14 +7,17 @@ export const router = createBrowserRouter([
       const { ShellRoute } = await import('./shell/ShellRoute')
       return { Component: ShellRoute }
     },
-    children: [
-      {
-        index: true,
-      },
-      {
-        path: 'piece/:slug',
-      },
-    ],
+  },
+  {
+    path: '/project/:slug',
+    async lazy() {
+      const { ShellRoute } = await import('./shell/ShellRoute')
+      return { Component: ShellRoute }
+    },
+  },
+  {
+    path: '/piece/:slug',
+    loader: ({ params }) => redirect(params.slug ? `/project/${params.slug}` : '/'),
   },
   {
     path: '*',
