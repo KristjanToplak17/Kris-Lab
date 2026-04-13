@@ -18,8 +18,8 @@
   --shell-bg-top: #fbfcfe;
   --shell-bg-bottom: #e5ebf2;
   --shell-desktop-glow: rgba(255, 255, 255, 0.82);
-  --shell-dot: rgba(70, 87, 115, 0.052);
-  --shell-dot-active: rgba(110, 133, 178, 0.16);
+  --shell-dot: rgba(70, 87, 115, 0.062);
+  --shell-dot-active: rgba(110, 133, 178, 0.192);
   --shell-surface-air:
     linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(244, 248, 253, 0.18)),
     rgba(242, 247, 252, 0.28);
@@ -51,10 +51,28 @@
     inset 0 -1px 0 rgba(255, 255, 255, 0.12);
   --shell-chrome-border: rgba(82, 98, 126, 0.18);
   --shell-chrome-shadow:
-    0 28px 60px rgba(66, 80, 104, 0.112),
-    0 10px 24px rgba(66, 80, 104, 0.064),
+    0 28px 60px rgba(66, 80, 104, 0.101),
+    0 10px 24px rgba(66, 80, 104, 0.058),
     inset 0 1px 0 rgba(255, 255, 255, 0.88),
     inset 0 -1px 0 rgba(255, 255, 255, 0.16);
+  --shell-solid-window-border: rgba(97, 113, 138, 0.16);
+  --shell-solid-window-border-inactive: rgba(97, 113, 138, 0.11);
+  --shell-solid-window-shadow:
+    0 24px 54px rgba(66, 80, 104, 0.09),
+    0 9px 22px rgba(66, 80, 104, 0.049),
+    inset 0 1px 0 rgba(255, 255, 255, 0.84),
+    inset 0 -1px 0 rgba(214, 223, 235, 0.16);
+  --shell-solid-window-shadow-inactive:
+    0 14px 28px rgba(38, 46, 60, 0.108),
+    0 6px 13px rgba(38, 46, 60, 0.054),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  --shell-solid-window-highlight: rgba(255, 255, 255, 0.82);
+  --shell-solid-window-highlight-inactive: rgba(255, 255, 255, 0.28);
+  --shell-solid-window-edge: rgba(227, 233, 242, 0.78);
+  --shell-solid-window-edge-inactive: rgba(227, 233, 242, 0.44);
+  --shell-solid-window-stage-edge: rgba(97, 113, 138, 0.08);
+  --shell-solid-window-stage-edge-strong: rgba(97, 113, 138, 0.12);
+  --shell-solid-window-stage-highlight: rgba(255, 255, 255, 0.5);
   --shell-divider: rgba(70, 87, 113, 0.1);
   --shell-divider-strong: rgba(70, 87, 113, 0.16);
   --shell-divider-stronger: rgba(70, 87, 113, 0.24);
@@ -83,7 +101,42 @@
   --shell-control-shadow:
     0 8px 18px rgba(89, 103, 130, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.76);
-  --shell-dock-bg: rgba(228, 235, 244, 0.76);
+  --shell-menubar-bg: rgba(246, 246, 248, 0.8);
+  --shell-menubar-border: rgba(0, 0, 0, 0.1);
+  --shell-menubar-text: rgba(24, 27, 33, 0.92);
+  --shell-menubar-hover: rgba(88, 97, 112, 0.06);
+  --shell-menubar-text-hover: #ebf2f5;
+  --shell-menubar-menu-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(243, 247, 252, 0.9)),
+    rgba(244, 247, 251, 0.96);
+  --shell-menubar-menu-border: rgba(95, 108, 130, 0.16);
+  --shell-menubar-menu-shadow:
+    0 18px 34px rgba(59, 69, 84, 0.14),
+    0 6px 16px rgba(59, 69, 84, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --shell-menubar-menu-preview-ring: rgba(255, 255, 255, 0.54);
+  --shell-menubar-menu-selected: #ebf2f5;
+  --shell-menubar-height: 28px;
+  --shell-menubar-inset-inline: 16px;
+  --shell-menubar-group-gap: 4px;
+  --shell-menubar-status-gap: 12px;
+  --shell-menubar-item-height: 24px;
+  --shell-menubar-icon-slot-width: 32px;
+  --shell-menubar-icon-button-size: 24px;
+  --shell-menubar-icon-size: 16px;
+  --shell-menubar-item-radius: 4px;
+  --shell-menubar-item-padding-inline: 8px;
+  --shell-menubar-item-padding-block: 2px;
+  --shell-menubar-icon-padding: 4px;
+  --shell-menubar-font-size: 14px;
+  --shell-menubar-line-height: 20px;
+  --shell-menubar-font-weight: 500;
+  --shell-menubar-transition-duration: 160ms;
+  --shell-menubar-transition-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --shell-dock-bg:
+    radial-gradient(circle at 50% -14%, rgba(255, 255, 255, 0.68), transparent 60%),
+    linear-gradient(180deg, rgba(240, 245, 251, 0.84), rgba(225, 232, 242, 0.74)),
+    rgba(225, 232, 242, 0.82);
   --shell-dock-border: rgba(255, 255, 255, 0.64);
   --shell-dock-shadow: var(--shell-float-shadow);
   --shell-dock-icon: rgba(31, 39, 52, 0.94);
@@ -95,7 +148,7 @@
   --shell-selection-strong: rgba(119, 144, 190, 0.28);
   --shell-selection-border: rgba(255, 255, 255, 0.66);
   --shell-row-hover: rgba(82, 100, 127, 0.082);
-  --shell-indicator: rgba(76, 91, 118, 0.74);
+  --shell-indicator: #ebebed;
   --shell-focus-ring: rgba(116, 150, 212, 0.22);
   --shell-icon-neutral: rgba(86, 99, 118, 0.22);
   --shell-icon-neutral-strong: rgba(67, 77, 94, 0.4);
@@ -137,8 +190,8 @@
   --shell-bg-top: #171e28;
   --shell-bg-bottom: #0c1219;
   --shell-desktop-glow: rgba(176, 193, 226, 0.12);
-  --shell-dot: rgba(201, 212, 232, 0.048);
-  --shell-dot-active: rgba(151, 176, 226, 0.118);
+  --shell-dot: rgba(201, 212, 232, 0.058);
+  --shell-dot-active: rgba(151, 176, 226, 0.142);
   --shell-surface-air:
     linear-gradient(180deg, rgba(42, 54, 70, 0.56), rgba(17, 23, 31, 0.12)),
     rgba(18, 25, 34, 0.24);
@@ -170,10 +223,28 @@
     inset 0 -1px 0 rgba(0, 0, 0, 0.24);
   --shell-chrome-border: rgba(198, 213, 238, 0.16);
   --shell-chrome-shadow:
-    0 30px 64px rgba(0, 0, 0, 0.336),
-    0 12px 26px rgba(0, 0, 0, 0.192),
+    0 30px 64px rgba(0, 0, 0, 0.302),
+    0 12px 26px rgba(0, 0, 0, 0.173),
     inset 0 1px 0 rgba(221, 231, 252, 0.14),
     inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+  --shell-solid-window-border: rgba(198, 213, 238, 0.14);
+  --shell-solid-window-border-inactive: rgba(198, 213, 238, 0.1);
+  --shell-solid-window-shadow:
+    0 28px 58px rgba(0, 0, 0, 0.281),
+    0 12px 28px rgba(0, 0, 0, 0.169),
+    inset 0 1px 0 rgba(223, 233, 252, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+  --shell-solid-window-shadow-inactive:
+    0 17px 34px rgba(0, 0, 0, 0.234),
+    0 7px 16px rgba(0, 0, 0, 0.144),
+    inset 0 1px 0 rgba(223, 233, 252, 0.08);
+  --shell-solid-window-highlight: rgba(233, 240, 255, 0.16);
+  --shell-solid-window-highlight-inactive: rgba(233, 240, 255, 0.08);
+  --shell-solid-window-edge: rgba(214, 226, 247, 0.14);
+  --shell-solid-window-edge-inactive: rgba(214, 226, 247, 0.08);
+  --shell-solid-window-stage-edge: rgba(198, 213, 238, 0.08);
+  --shell-solid-window-stage-edge-strong: rgba(198, 213, 238, 0.12);
+  --shell-solid-window-stage-highlight: rgba(233, 240, 255, 0.08);
   --shell-divider: rgba(198, 213, 238, 0.1);
   --shell-divider-strong: rgba(198, 213, 238, 0.16);
   --shell-divider-stronger: rgba(198, 213, 238, 0.24);
@@ -197,7 +268,25 @@
   --shell-control-shadow:
     0 10px 22px rgba(0, 0, 0, 0.18),
     inset 0 1px 0 rgba(223, 233, 252, 0.14);
-  --shell-dock-bg: rgba(29, 38, 50, 0.86);
+  --shell-menubar-bg: rgba(34, 40, 50, 0.82);
+  --shell-menubar-border: rgba(255, 255, 255, 0.08);
+  --shell-menubar-text: rgba(241, 244, 249, 0.94);
+  --shell-menubar-hover: rgba(210, 221, 238, 0.06);
+  --shell-menubar-text-hover: #ebf2f5;
+  --shell-menubar-menu-bg:
+    linear-gradient(180deg, rgba(43, 51, 63, 0.94), rgba(31, 38, 49, 0.92)),
+    rgba(29, 36, 47, 0.96);
+  --shell-menubar-menu-border: rgba(221, 231, 252, 0.14);
+  --shell-menubar-menu-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.32),
+    0 6px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(223, 233, 252, 0.1);
+  --shell-menubar-menu-preview-ring: rgba(223, 233, 252, 0.14);
+  --shell-menubar-menu-selected: #ebf2f5;
+  --shell-dock-bg:
+    radial-gradient(circle at 50% -14%, rgba(221, 231, 252, 0.16), transparent 60%),
+    linear-gradient(180deg, rgba(35, 45, 58, 0.9), rgba(24, 32, 44, 0.84)),
+    rgba(25, 33, 45, 0.88);
   --shell-dock-border: rgba(221, 231, 252, 0.18);
   --shell-dock-icon: rgba(234, 240, 250, 0.96);
   --shell-dock-icon-soft: rgba(183, 193, 210, 0.42);
@@ -207,7 +296,7 @@
   --shell-selection-strong: rgba(126, 152, 203, 0.36);
   --shell-selection-border: rgba(228, 236, 252, 0.22);
   --shell-row-hover: rgba(204, 216, 240, 0.1);
-  --shell-indicator: rgba(189, 200, 220, 0.74);
+  --shell-indicator: #ebebed;
   --shell-focus-ring: rgba(126, 152, 203, 0.26);
   --shell-icon-neutral: rgba(178, 189, 207, 0.22);
   --shell-icon-neutral-strong: rgba(201, 211, 228, 0.38);

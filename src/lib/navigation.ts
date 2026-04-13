@@ -4,10 +4,6 @@ export interface LabNavigationState {
   fromLab?: boolean
 }
 
-export function createLabNavigationState(): LabNavigationState {
-  return { fromLab: true }
-}
-
 export function getProjectPath(slug: string): string {
   return `/project/${slug}`
 }

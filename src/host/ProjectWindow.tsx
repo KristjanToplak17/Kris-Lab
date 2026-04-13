@@ -83,7 +83,7 @@ export function ProjectWindow({
             />
           </div>
 
-          <div className="shell-window__title">{piece.title}</div>
+          <div className="shell-window__title shell-window__title--project">{piece.title}</div>
 
           <div className="shell-window__title-spacer" aria-hidden="true" />
         </header>

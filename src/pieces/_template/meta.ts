@@ -1,4 +1,3 @@
-import poster from './assets/poster.svg'
 import type { PieceManifest } from '../types'
 
 export const meta = {
@@ -8,5 +7,4 @@ export const meta = {
   status: 'exploration',
   mode: 'hosted',
   order: 999,
-  poster,
 } satisfies PieceManifest

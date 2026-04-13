@@ -7,6 +7,7 @@ import type {
   PublicProjectEntry,
 } from './types'
 import { meta as example1Meta } from './example1/meta'
+import { meta as tripToMaltaMeta } from './trip-to-malta/meta'
 
 const blockedPublicSlugSegments = ['placeholder', 'tbd', 'template', 'todo', 'wip'] as const
 
@@ -29,16 +30,13 @@ function definePiece(manifest: PieceManifest, importer: PieceImporter): PieceMet
 }
 
 export const pieceRegistry: PieceMeta[] = [
+  definePiece(tripToMaltaMeta, () => import('./trip-to-malta/Piece')),
   definePiece(example1Meta, () => import('./example1/Piece')),
 ].sort((left, right) => left.order - right.order)
 
 export const lazyPieceComponents = Object.fromEntries(
   pieceRegistry.map((piece) => [piece.slug, lazy(piece.importer)]),
 ) as Record<string, LazyPieceComponent>
-
-export function getApprovedPieces(): PieceMeta[] {
-  return pieceRegistry.filter((piece) => piece.status === 'approved')
-}
 
 export function getPieceBySlug(slug: string): PieceMeta | undefined {
   return pieceRegistry.find((piece) => piece.slug === slug)

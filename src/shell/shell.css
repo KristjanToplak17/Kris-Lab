@@ -12,7 +12,7 @@
   grid-template-rows: auto minmax(0, 1fr) auto;
   justify-items: stretch;
   gap: clamp(0.92rem, 1.9vw, 1.24rem);
-  padding: clamp(0.08rem, 0.4vw, 0.16rem) 0 clamp(1rem, 2vw, 1.28rem);
+  padding: 0 0 clamp(1rem, 2vw, 1.28rem);
   overflow: hidden;
   --shell-frame-width: 69rem;
   --shell-top-bar-padding-inline: clamp(0.42rem, 1.1vw, 0.9rem);
@@ -34,13 +34,13 @@
 .shell-route::before {
   background-image: radial-gradient(circle at 1px 1px, var(--shell-dot) 1px, transparent 0);
   background-size: 24px 24px;
-  opacity: 0.58;
+  opacity: 1;
 }
 
 .shell-route::after {
   background-image: radial-gradient(circle at 1px 1px, var(--shell-dot-active) 1px, transparent 0);
   background-size: 24px 24px;
-  opacity: calc(var(--shell-cursor-opacity) * 0.64);
+  opacity: calc(var(--shell-cursor-opacity) * 0.74);
   mask-image: radial-gradient(
     18rem 18rem at var(--shell-cursor-x) var(--shell-cursor-y),
     black 0%,
@@ -51,9 +51,21 @@
   transition: opacity var(--shell-duration-fast) var(--shell-ease-out);
 }
 
+.shell-route[data-shell-background-kind='static']::before,
+.shell-route[data-shell-background-kind='static']::after {
+  opacity: 0;
+}
+
 .shell-route > * {
   position: relative;
   z-index: 1;
+}
+
+.shell-route__background {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .shell-system-bar,
@@ -63,7 +75,11 @@
 }
 
 .shell-system-bar {
-  padding-inline: var(--shell-top-bar-padding-inline);
+  box-sizing: border-box;
+  min-height: var(--shell-menubar-height);
+  padding-inline: var(--shell-menubar-inset-inline);
+  background: var(--shell-menubar-bg);
+  border-bottom: 1px solid var(--shell-menubar-border);
 }
 
 .shell-dock {
@@ -73,11 +89,12 @@
 
 .shell-system-bar__inner {
   width: 100%;
-  min-height: 1.84rem;
+  min-height: var(--shell-menubar-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 0.22rem;
+  gap: 1rem;
+  padding: 0;
 }
 
 .shell-system-bar__inner > * {
@@ -90,30 +107,251 @@
   display: inline-flex;
   align-items: center;
   min-width: 0;
+  color: var(--shell-menubar-text);
 }
 
-.shell-system-bar__brand {
-  padding: 0 0.18rem;
+.shell-system-bar__left {
+  justify-content: flex-start;
+  gap: var(--shell-menubar-group-gap);
+}
+
+.shell-system-bar__right {
+  justify-content: flex-end;
+  flex-shrink: 0;
+  gap: var(--shell-menubar-status-gap);
+}
+
+.shell-system-bar__button,
+.shell-system-bar__time {
   font-family: var(--shell-font-ui);
-  font-size: 0.79rem;
-  font-weight: 560;
-  line-height: 1;
-  letter-spacing: -0.014em;
-  color: color-mix(in srgb, var(--shell-text) 78%, rgba(138, 150, 172, 0.52) 22%);
+  font-size: var(--shell-menubar-font-size);
+  line-height: var(--shell-menubar-line-height);
+  letter-spacing: -0.01em;
+  color: var(--shell-menubar-text);
   white-space: nowrap;
 }
 
-.shell-system-bar__time {
-  min-height: 1.12rem;
+.shell-system-bar__button {
   display: inline-flex;
   align-items: center;
-  padding: 0 0.2rem;
-  font-size: 0.72rem;
+  justify-content: center;
+  flex: none;
+  margin: 0;
+  border: 0;
+  border-radius: var(--shell-menubar-item-radius);
+  background: transparent;
+  padding: 0;
+  font-weight: var(--shell-menubar-font-weight);
+  cursor: default;
+  appearance: none;
+  -webkit-appearance: none;
+  transition:
+    background-color var(--shell-menubar-transition-duration) var(--shell-menubar-transition-ease),
+    color var(--shell-menubar-transition-duration) var(--shell-menubar-transition-ease);
+}
+
+.shell-system-bar__button--interactive {
+  cursor: pointer;
+}
+
+.shell-system-bar__button:focus-visible {
+  outline: none;
+}
+
+.shell-system-bar__button--interactive:focus-visible,
+.shell-background-menu__option:focus-visible {
+  box-shadow: 0 0 0 3px var(--shell-focus-ring);
+  outline: none;
+}
+
+.shell-system-bar__menu-group.is-open .shell-system-bar__menu-trigger {
+  background: var(--shell-menubar-text-hover);
+}
+
+.shell-system-bar__logo-slot {
+  width: var(--shell-menubar-icon-slot-width);
+  height: 20px;
+  padding:
+    var(--shell-menubar-item-padding-block)
+    var(--shell-menubar-item-padding-inline);
+}
+
+.shell-system-bar__logo-glyph {
+  width: var(--shell-menubar-icon-size);
+  height: var(--shell-menubar-icon-size);
+  opacity: 0.92;
+}
+
+.shell-system-bar__logo-image {
+  width: var(--shell-menubar-icon-size);
+  height: var(--shell-menubar-icon-size);
+  display: block;
+  object-fit: contain;
+}
+
+.shell-system-bar__brand,
+.shell-system-bar__menu-item {
+  min-height: var(--shell-menubar-item-height);
+  padding:
+    var(--shell-menubar-item-padding-block)
+    var(--shell-menubar-item-padding-inline);
+}
+
+.shell-system-bar__brand {
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.shell-system-bar__menu-item {
+  flex-shrink: 0;
+}
+
+.shell-system-bar__menu-group {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.shell-system-bar__menu-trigger {
+  gap: 0.28rem;
+}
+
+.shell-system-bar__menu-caret {
+  width: 0.72rem;
+  height: 0.72rem;
+  opacity: 0.66;
+}
+
+.shell-background-menu {
+  position: absolute;
+  top: calc(100% + 0.38rem);
+  left: 0;
+  min-width: 12.2rem;
+  padding: 0.36rem;
+  border: 1px solid var(--shell-menubar-menu-border);
+  border-radius: 0.86rem;
+  background: var(--shell-menubar-menu-bg);
+  box-shadow: var(--shell-menubar-menu-shadow);
+  backdrop-filter: blur(16px) saturate(135%);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
+  overflow: hidden;
+  contain: paint;
+  transform-origin: top left;
+  will-change: opacity, transform;
+}
+
+.shell-background-menu__list {
+  display: grid;
+  gap: 0.16rem;
+}
+
+.shell-background-menu__option {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.58rem;
+  padding: 0.34rem 0.38rem;
+  border: 0;
+  border-radius: 0.64rem;
+  background: transparent;
+  color: var(--shell-menubar-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 120ms var(--shell-ease-out),
+    color 120ms var(--shell-ease-out);
+}
+
+.shell-background-menu__option.is-selected {
+  background: var(--shell-menubar-menu-selected);
+}
+
+.shell-background-menu__preview {
+  width: 2rem;
+  height: 1.42rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 0.42rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.06)),
+    rgba(223, 231, 241, 0.68);
+  box-shadow:
+    inset 0 0 0 1px var(--shell-menubar-menu-preview-ring),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26);
+}
+
+.shell-background-menu__preview img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.shell-background-menu__preview--animated {
+  position: relative;
+  background:
+    radial-gradient(circle at 28% 30%, rgba(255, 255, 255, 0.92), transparent 42%),
+    linear-gradient(180deg, rgba(241, 246, 252, 0.95), rgba(200, 214, 232, 0.9));
+}
+
+.shell-background-menu__preview-animated-dot {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background-image: radial-gradient(circle at 1px 1px, rgba(77, 93, 121, 0.34) 1px, transparent 0);
+  background-size: 10px 10px;
+  opacity: 0.8;
+}
+
+.shell-background-menu__label {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.81rem;
   font-weight: 540;
-  line-height: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.012em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shell-background-menu__check {
+  width: 0.9rem;
+  height: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--shell-menubar-text) 88%, transparent);
+  transition: opacity 120ms var(--shell-ease-out);
+}
+
+.shell-background-menu__check svg {
+  width: 100%;
+  height: 100%;
+}
+
+.shell-system-bar__status-icon {
+  width: var(--shell-menubar-icon-button-size);
+  height: var(--shell-menubar-icon-button-size);
+  padding: var(--shell-menubar-icon-padding);
+}
+
+.shell-system-bar__icon-placeholder {
+  width: var(--shell-menubar-icon-size);
+  height: var(--shell-menubar-icon-size);
+  display: block;
+  opacity: 0;
+}
+
+.shell-system-bar__time {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  font-weight: var(--shell-menubar-font-weight);
   font-variant-numeric: tabular-nums;
-  color: color-mix(in srgb, var(--shell-text-soft) 82%, var(--shell-text) 18%);
 }
 
 .shell-route__viewport {
@@ -128,7 +366,53 @@
   z-index: 1;
 }
 
+.shell-route__background--static {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.shell-route__background--static::before,
+.shell-route__background--static::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.shell-route__background--static::before {
+  background:
+    linear-gradient(180deg, rgba(248, 250, 253, 0.11), rgba(248, 250, 253, 0.03)),
+    linear-gradient(180deg, rgba(13, 18, 25, 0.02), rgba(13, 18, 25, 0.1));
+}
+
+.shell-route__background--static::after {
+  background:
+    radial-gradient(circle at top center, rgba(255, 255, 255, 0.18), transparent 40%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(10, 14, 20, 0.1));
+}
+
 .shell-desktop__window-frame {
+  position: absolute;
+  min-width: 0;
+  min-height: 0;
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    left 160ms var(--shell-ease-out),
+    top 160ms var(--shell-ease-out),
+    width 160ms var(--shell-ease-out),
+    height 160ms var(--shell-ease-out),
+    transform var(--shell-duration-fast) var(--shell-ease-out),
+    opacity var(--shell-duration-fast) var(--shell-ease-out);
+}
+
+.shell-desktop__window-frame.is-dragging {
+  transition: none;
+}
+
+.shell-desktop__object {
   position: absolute;
   min-width: 0;
   min-height: 0;
@@ -140,8 +424,28 @@
     height 160ms var(--shell-ease-out);
 }
 
-.shell-desktop__window-frame.is-dragging {
+.shell-desktop__object.is-dragging {
   transition: none;
+}
+
+.shell-desktop__object--weather {
+  cursor: grab;
+  touch-action: none;
+}
+
+.shell-route[data-window-dragging='true'] .shell-desktop__object--weather.is-dragging {
+  cursor: grabbing;
+}
+
+.shell-desktop__window-frame.is-entering {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.shell-desktop__window-frame.is-closing {
+  opacity: 0;
+  transform: translateY(3px);
+  pointer-events: none;
 }
 
 .shell-desktop__window-frame .shell-window,
@@ -152,23 +456,485 @@
   max-height: none;
   min-height: 0;
   transition:
-    box-shadow 160ms var(--shell-ease-out),
-    border-color 160ms var(--shell-ease-out),
-    opacity 160ms var(--shell-ease-out);
+    box-shadow var(--shell-duration-fast) var(--shell-ease-out),
+    border-color var(--shell-duration-fast) var(--shell-ease-out),
+    opacity var(--shell-duration-fast) var(--shell-ease-out);
 }
 
-.shell-desktop__window-frame.is-inactive .shell-window,
+.weather-widget {
+  width: 100%;
+  height: 100%;
+}
+
+.weather-widget__surface {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--shell-solid-window-border) 82%, rgba(255, 255, 255, 0.28));
+  border-radius: 1.3rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(244, 248, 253, 0.22)),
+    color-mix(in srgb, var(--shell-surface-chrome) 74%, var(--shell-surface-paper) 26%);
+  box-shadow:
+    0 22px 38px rgba(66, 80, 104, 0.11),
+    0 10px 22px rgba(66, 80, 104, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(22px) saturate(126%);
+  -webkit-backdrop-filter: blur(22px) saturate(126%);
+}
+
+.weather-widget__surface::before,
+.weather-widget__surface::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.weather-widget__surface::before {
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.34), transparent 44%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 38%, transparent 72%),
+    linear-gradient(180deg, rgba(214, 224, 237, 0.22), rgba(214, 224, 237, 0.08));
+  opacity: 0.94;
+}
+
+.weather-widget__surface::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(17, 24, 34, 0.08));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
+    inset 0 0 0 1px color-mix(in srgb, var(--shell-solid-window-edge) 64%, transparent);
+}
+
+.weather-widget__header,
+.weather-widget__body {
+  position: relative;
+  z-index: 1;
+}
+
+.weather-widget__header {
+  padding: 0.92rem 1rem 0.14rem;
+}
+
+.weather-widget__location-block {
+  min-width: 0;
+}
+
+.weather-widget__eyebrow,
+.weather-widget__location,
+.weather-widget__temperature,
+.weather-widget__feels-like,
+.weather-widget__condition-label,
+.weather-widget__range,
+.weather-widget__hourly-label,
+.weather-widget__hourly-temp,
+.weather-widget__hourly-placeholder {
+  margin: 0;
+}
+
+.weather-widget__eyebrow {
+  color: color-mix(in srgb, var(--shell-text-soft) 88%, transparent);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.weather-widget__location {
+  margin-top: 0.26rem;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--shell-text) 94%, black 6%);
+  font-size: 0.96rem;
+  font-weight: 600;
+  line-height: 1.14;
+  letter-spacing: -0.018em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weather-widget__body {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 0.68rem;
+  padding: 0 1rem 0.92rem;
+}
+
+.weather-widget__main {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.72rem;
+  align-items: end;
+}
+
+.weather-widget__temperature-block {
+  min-width: 0;
+  display: grid;
+  gap: 0.22rem;
+}
+
+.weather-widget__temperature {
+  color: color-mix(in srgb, var(--shell-text-strong) 96%, var(--shell-text) 4%);
+  font-size: 3rem;
+  font-weight: 510;
+  line-height: 0.88;
+  letter-spacing: -0.055em;
+}
+
+.weather-widget__temperature-unit {
+  color: color-mix(in srgb, var(--shell-text-soft) 72%, var(--shell-text) 28%);
+  font-size: 0.58em;
+  font-weight: 540;
+  vertical-align: top;
+}
+
+.weather-widget__feels-like {
+  color: color-mix(in srgb, var(--shell-text-soft) 80%, var(--shell-text) 20%);
+  font-size: 0.74rem;
+  font-weight: 530;
+  letter-spacing: -0.012em;
+}
+
+.weather-widget__condition {
+  display: grid;
+  justify-items: end;
+  gap: 0.38rem;
+  text-align: right;
+}
+
+.weather-widget__condition-glyph {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--shell-text) 86%, var(--shell-text-soft) 14%);
+}
+
+.weather-widget__condition-glyph svg {
+  width: 100%;
+  height: 100%;
+}
+
+.weather-widget__condition-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.weather-widget__condition-label {
+  color: color-mix(in srgb, var(--shell-text) 90%, var(--shell-text-soft) 10%);
+  font-size: 0.82rem;
+  font-weight: 580;
+  letter-spacing: -0.016em;
+}
+
+.weather-widget__range {
+  color: color-mix(in srgb, var(--shell-text-soft) 80%, var(--shell-text) 20%);
+  font-size: 0.74rem;
+  font-weight: 530;
+  letter-spacing: -0.012em;
+}
+
+.weather-widget__footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.72rem;
+  align-items: center;
+}
+
+.weather-widget__hourly {
+  min-width: 0;
+}
+
+.weather-widget__hourly-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.38rem;
+  margin: 0;
+  padding: 0;
+}
+
+.weather-widget__hourly-point {
+  min-width: 0;
+  display: grid;
+  gap: 0.18rem;
+}
+
+.weather-widget__hourly-label {
+  color: color-mix(in srgb, var(--shell-text-soft) 82%, var(--shell-text) 18%);
+  font-size: 0.7rem;
+  font-weight: 560;
+  letter-spacing: -0.012em;
+}
+
+.weather-widget__hourly-temp {
+  color: color-mix(in srgb, var(--shell-text) 88%, var(--shell-text-soft) 12%);
+  font-size: 0.75rem;
+  font-weight: 560;
+  letter-spacing: -0.014em;
+}
+
+.weather-widget__hourly-placeholder {
+  display: inline-flex;
+  min-height: 1.98rem;
+  align-items: center;
+  color: color-mix(in srgb, var(--shell-text-soft) 86%, var(--shell-text) 14%);
+  font-size: 0.74rem;
+  font-weight: 530;
+  letter-spacing: -0.012em;
+}
+
+.weather-widget__refresh {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--shell-control-border) 90%, transparent);
+  border-radius: 0.68rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.08)),
+    color-mix(in srgb, var(--shell-control-surface) 84%, transparent);
+  box-shadow:
+    0 6px 12px rgba(89, 103, 130, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  color: color-mix(in srgb, var(--shell-text-soft) 84%, var(--shell-text) 16%);
+  cursor: pointer;
+  transition:
+    transform var(--shell-duration-fast) var(--shell-ease-out),
+    background-color var(--shell-duration-fast) var(--shell-ease-out),
+    border-color var(--shell-duration-fast) var(--shell-ease-out),
+    box-shadow var(--shell-duration-mid) var(--shell-ease-out),
+    color var(--shell-duration-fast) var(--shell-ease-out),
+    opacity var(--shell-duration-fast) var(--shell-ease-out);
+}
+
+.weather-widget__refresh:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+
+.weather-widget__refresh:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--shell-focus-ring),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+
+.weather-widget__refresh-icon {
+  width: 0.92rem;
+  height: 0.92rem;
+}
+
+.weather-widget__refresh-icon.is-spinning {
+  animation: weather-widget-spin 780ms linear infinite;
+}
+
+@keyframes weather-widget-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.shell-desktop__window-frame.is-active.is-foregrounding .shell-window__title {
+  color: color-mix(in srgb, var(--shell-text-soft) 60%, var(--shell-text) 40%);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-window {
+  border-color: color-mix(in srgb, var(--shell-window-border) 72%, rgba(255, 255, 255, 0.08));
+}
+
 .shell-desktop__window-frame.is-inactive .about-window,
 .shell-desktop__window-frame.is-inactive .project-window {
-  border-color: color-mix(in srgb, var(--shell-window-border) 82%, rgba(255, 255, 255, 0.08));
+  border-color: var(--shell-solid-window-border-inactive);
+}
+
+.shell-desktop__window-frame.is-inactive .about-window {
+  border-color: color-mix(in srgb, var(--shell-window-border) 72%, rgba(255, 255, 255, 0.08));
+}
+
+.shell-desktop__window-frame.is-inactive .shell-window::before {
+  opacity: 0.78;
+}
+
+.shell-desktop__window-frame.is-inactive .shell-window::after {
   box-shadow:
-    0 18px 38px rgba(38, 46, 60, 0.18),
-    0 8px 18px rgba(38, 46, 60, 0.09),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    inset 0 1px 0 color-mix(in srgb, var(--shell-glass-highlight) 54%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--shell-glass-edge) 58%, transparent);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-window__titlebar,
+.shell-desktop__window-frame.is-inactive .about-window__titlebar,
+.shell-desktop__window-frame.is-inactive .project-window__titlebar {
+  --shell-titlebar-divider: color-mix(in srgb, var(--shell-line) 72%, transparent);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-window__titlebar {
+  --shell-titlebar-fill:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.08)),
+    color-mix(in srgb, var(--shell-surface-chrome) 84%, white 16%);
+  --shell-titlebar-under-edge:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, rgba(255, 255, 255, 0.18) 72%, transparent) 0%,
+      transparent 100%
+    );
+  --shell-titlebar-under-edge-opacity: 0.58;
+}
+
+.shell-desktop__window-frame.is-inactive .shell-window__toolbar {
+  border-bottom-color: color-mix(in srgb, var(--shell-line) 74%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.03)),
+    color-mix(in srgb, var(--shell-surface-chrome) 68%, var(--shell-surface-navigation) 32%);
+}
+
+.shell-desktop__window-frame.is-inactive .about-window__titlebar,
+.shell-desktop__window-frame.is-inactive .project-window__titlebar {
+  --shell-titlebar-fill:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 248, 252, 0.88)),
+    rgba(246, 249, 253, 0.94);
+  --shell-titlebar-under-edge:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, rgba(255, 255, 255, 0.3) 74%, transparent) 0%,
+      transparent 100%
+    );
+  --shell-titlebar-under-edge-opacity: 0.78;
+}
+
+.shell-desktop__window-frame.is-inactive .about-window__titlebar {
+  --shell-titlebar-fill:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.08)),
+    color-mix(in srgb, var(--shell-surface-chrome) 84%, white 16%);
+  --shell-titlebar-under-edge:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, rgba(255, 255, 255, 0.18) 72%, transparent) 0%,
+      transparent 100%
+    );
+  --shell-titlebar-under-edge-opacity: 0.58;
+}
+
+.shell-desktop__window-frame.is-inactive .about-window::before,
+.shell-desktop__window-frame.is-inactive .project-window::before {
+  opacity: 0.72;
+}
+
+.shell-desktop__window-frame.is-inactive .about-window::before {
+  opacity: 0.78;
+}
+
+.shell-desktop__window-frame.is-inactive .about-window::after,
+.shell-desktop__window-frame.is-inactive .project-window::after {
+  box-shadow:
+    inset 0 1px 0 var(--shell-solid-window-highlight-inactive),
+    inset 0 0 0 1px var(--shell-solid-window-edge-inactive),
+    inset 0 -1px 0 color-mix(in srgb, var(--shell-solid-window-stage-edge) 72%, transparent);
+}
+
+.shell-desktop__window-frame.is-inactive .about-window::after {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--shell-glass-highlight) 54%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--shell-glass-edge) 58%, transparent);
+}
+
+.shell-desktop__window-frame.is-inactive .about-window__stage::after,
+.shell-desktop__window-frame.is-inactive .project-window__stage::after {
+  opacity: 0.74;
+}
+
+.shell-desktop__window-frame.is-inactive .about-window__stage::after {
+  opacity: 1;
+}
+
+.shell-desktop__window-frame.is-inactive .shell-sidebar {
+  border-right-color: color-mix(in srgb, var(--shell-line) 68%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--shell-surface-navigation) 93%, white 7%),
+      color-mix(in srgb, var(--shell-surface-navigation) 82%, var(--shell-surface-paper-muted) 18%)
+    );
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.16);
 }
 
 .shell-desktop__window-frame.is-inactive .shell-window__title {
-  color: color-mix(in srgb, var(--shell-text-soft) 78%, rgba(126, 138, 160, 0.72) 22%);
+  color: color-mix(in srgb, var(--shell-text-soft) 70%, rgba(126, 138, 160, 0.78) 30%);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-window__traffic-light {
+  opacity: 0.82;
+  filter: saturate(0.92) brightness(0.985);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-toolbar__path {
+  color: color-mix(in srgb, var(--shell-text-soft) 88%, transparent);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-toolbar__path-current {
+  color: color-mix(in srgb, var(--shell-text-soft) 84%, var(--shell-text) 16%);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-toolbar__back {
+  color: color-mix(in srgb, var(--shell-text-soft) 88%, transparent);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-toolbar__view-controls {
+  border-color: color-mix(in srgb, var(--shell-control-border) 56%, transparent);
+  background: color-mix(in srgb, var(--shell-control-surface) 42%, transparent);
+  box-shadow:
+    0 1px 2px rgba(101, 118, 148, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-view-toggle__button {
+  color: color-mix(in srgb, var(--shell-text-soft) 90%, var(--shell-text) 10%);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-view-toggle__button.is-active {
+  background: color-mix(in srgb, var(--shell-selection-strong) 26%, var(--shell-control-hover) 74%);
+  border-color: color-mix(in srgb, var(--shell-control-border) 68%, transparent);
+  box-shadow:
+    0 1px 2px rgba(101, 118, 148, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  color: color-mix(in srgb, var(--shell-text-soft) 82%, var(--shell-text) 18%);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-sidebar__item {
+  color: color-mix(in srgb, var(--shell-text-soft) 82%, var(--shell-text) 18%);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-sidebar__item.is-active {
+  background: color-mix(in srgb, var(--shell-row-hover) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--shell-control-border) 66%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  color: color-mix(in srgb, var(--shell-text) 88%, var(--shell-text-soft) 12%);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-sidebar__item-icon,
+.shell-desktop__window-frame.is-inactive .shell-sidebar__tree-cue,
+.shell-desktop__window-frame.is-inactive .shell-sidebar__item-count {
+  color: color-mix(in srgb, var(--shell-text-soft) 84%, var(--shell-text) 16%);
+}
+
+.shell-desktop__window-frame.is-inactive .shell-sidebar__item.is-active .shell-sidebar__item-icon,
+.shell-desktop__window-frame.is-inactive .shell-sidebar__item.is-active .shell-sidebar__tree-cue,
+.shell-desktop__window-frame.is-inactive .shell-sidebar__item.is-active .shell-sidebar__item-count {
+  color: color-mix(in srgb, var(--shell-text-soft) 78%, var(--shell-text) 22%);
 }
 
 .shell-window {
@@ -184,7 +950,9 @@
   border: 1px solid var(--shell-window-border);
   border-radius: 1.18rem;
   background: var(--shell-surface-chrome);
-  box-shadow: var(--shell-window-shadow);
+  box-shadow:
+    var(--shell-window-shadow),
+    0 16px 30px rgba(66, 80, 104, 0.025);
   backdrop-filter: blur(22px) saturate(154%);
   -webkit-backdrop-filter: blur(22px) saturate(154%);
 }
@@ -228,23 +996,66 @@
 }
 
 .shell-window__titlebar {
-  grid-template-columns: 4.25rem 1fr 4.25rem;
-  gap: 0.6rem;
-  padding: 0 0.98rem;
-  border-bottom: 1px solid var(--shell-line);
-  background:
+  --shell-titlebar-fill:
     linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.12)),
     color-mix(in srgb, var(--shell-surface-chrome) 88%, white 12%);
+  --shell-titlebar-divider: color-mix(in srgb, var(--shell-line) 78%, transparent);
+  --shell-titlebar-under-edge:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, rgba(255, 255, 255, 0.26) 78%, transparent) 0%,
+      transparent 100%
+    );
+  --shell-titlebar-under-edge-opacity: 0.7;
+  grid-template-columns: 4.25rem 1fr 4.25rem;
+  gap: 0.52rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--shell-titlebar-divider);
+  background: var(--shell-titlebar-fill);
+}
+
+.shell-window__titlebar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 0.7rem;
+  pointer-events: none;
+  background: var(--shell-titlebar-under-edge);
+  opacity: var(--shell-titlebar-under-edge-opacity);
 }
 
 .shell-window__toolbar {
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 0.78rem;
+  --shell-toolbar-side-width: 4.4rem;
+  grid-template-columns:
+    minmax(var(--shell-toolbar-side-width), auto)
+    minmax(0, 1fr)
+    minmax(var(--shell-toolbar-side-width), auto);
+  gap: 0.56rem;
   padding: 0 0.98rem;
-  border-bottom: 1px solid var(--shell-line);
+  border-bottom: 1px solid color-mix(in srgb, var(--shell-line) 86%, transparent);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04)),
     color-mix(in srgb, var(--shell-surface-chrome) 72%, var(--shell-surface-navigation) 28%);
+}
+
+.shell-toolbar__slot {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.shell-toolbar__slot--leading {
+  justify-content: flex-start;
+}
+
+.shell-toolbar__slot--center {
+  justify-content: center;
+}
+
+.shell-toolbar__slot--trailing {
+  justify-content: flex-end;
 }
 
 [data-window-drag-handle] {
@@ -269,9 +1080,10 @@ body[data-window-dragging='true'] {
 }
 
 .shell-window__traffic {
+  min-height: 1.75rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.46rem;
 }
 
 .shell-window__traffic-light {
@@ -288,9 +1100,11 @@ body[data-window-dragging='true'] {
   -webkit-appearance: none;
   box-shadow: none;
   transition:
-    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
-    filter 150ms cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    transform var(--shell-duration-fast) var(--shell-ease-out),
+    background-color var(--shell-duration-fast) var(--shell-ease-out),
+    filter var(--shell-duration-fast) var(--shell-ease-out),
+    opacity var(--shell-duration-fast) var(--shell-ease-out),
+    box-shadow var(--shell-duration-mid) var(--shell-ease-out);
 }
 
 .shell-window__traffic-light::before,
@@ -303,8 +1117,8 @@ body[data-window-dragging='true'] {
   opacity: 0;
   transform-origin: 50% 50%;
   transition:
-    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1),
-    transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    opacity var(--shell-duration-fast) var(--shell-ease-out),
+    transform var(--shell-duration-fast) var(--shell-ease-out);
 }
 
 .shell-window__traffic-light--close {
@@ -373,11 +1187,37 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-window__title {
+  min-height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   justify-self: center;
-  font-size: 0.82rem;
-  font-weight: 618;
-  letter-spacing: -0.016em;
-  color: color-mix(in srgb, var(--shell-text-soft) 66%, var(--shell-text) 34%);
+  font-size: 0.81rem;
+  font-weight: 606;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  color: color-mix(in srgb, var(--shell-text-soft) 72%, var(--shell-text) 28%);
+  transition: color var(--shell-duration-mid) var(--shell-ease-out);
+}
+
+.shell-window__title-spacer {
+  min-height: 1.75rem;
+}
+
+.shell-window__title--launcher {
+  font-weight: 612;
+  color: color-mix(in srgb, var(--shell-text-soft) 62%, var(--shell-text) 38%);
+}
+
+.shell-window__title--about {
+  font-size: 0.8rem;
+  font-weight: 592;
+  color: color-mix(in srgb, var(--shell-text-soft) 76%, var(--shell-text) 24%);
+}
+
+.shell-window__title--project {
+  font-weight: 614;
+  color: color-mix(in srgb, var(--shell-text-soft) 64%, var(--shell-text) 36%);
 }
 
 .shell-toolbar__back,
@@ -389,6 +1229,14 @@ button.shell-window__traffic-light:focus-visible {
   transition-timing-function: var(--shell-ease-out);
 }
 
+.shell-toolbar__back,
+.shell-view-toggle__button,
+.about-window__close,
+.project-window__close,
+.shell-window__traffic-light {
+  will-change: transform;
+}
+
 .shell-toolbar__back {
   width: 1.96rem;
   height: 1.96rem;
@@ -396,8 +1244,8 @@ button.shell-window__traffic-light:focus-visible {
   place-items: center;
   border: 1px solid transparent;
   border-radius: 0.68rem;
-  background: transparent;
-  color: var(--shell-text-soft);
+  background: color-mix(in srgb, var(--shell-control-surface) 34%, transparent);
+  color: color-mix(in srgb, var(--shell-text-soft) 86%, var(--shell-text) 14%);
   cursor: pointer;
   transition-property: transform, background-color, border-color, box-shadow, color, opacity;
   transition-duration:
@@ -410,7 +1258,7 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-toolbar__back:disabled {
-  opacity: 0.34;
+  opacity: 0.44;
   pointer-events: none;
 }
 
@@ -425,24 +1273,38 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-toolbar__back:active {
+  transform: scale(0.985);
   background: color-mix(in srgb, var(--shell-control-active) 88%, transparent);
   color: var(--shell-text-strong);
 }
 
 .shell-toolbar__back-icon {
-  width: 0.9rem;
-  height: 0.9rem;
+  width: 0.88rem;
+  height: 0.88rem;
+  transform: translate(-0.03rem, -0.01rem);
 }
 
 .shell-toolbar__path {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 0.42rem;
+  justify-content: center;
+  gap: 0.3rem;
   color: var(--shell-text-soft);
-  font-size: 0.83rem;
-  font-weight: 530;
+  font-size: 0.8rem;
+  font-weight: 532;
+  line-height: 1;
   letter-spacing: -0.012em;
+  text-align: center;
+  transition: color var(--shell-duration-mid) var(--shell-ease-out);
+}
+
+.shell-toolbar__path-copy {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: inherit;
 }
 
 .shell-toolbar__path-root,
@@ -453,8 +1315,9 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-toolbar__path-current {
-  color: var(--shell-text);
-  font-weight: 575;
+  color: color-mix(in srgb, var(--shell-text-soft) 38%, var(--shell-text) 62%);
+  font-weight: 556;
+  transition: color var(--shell-duration-mid) var(--shell-ease-out);
 }
 
 .shell-toolbar__separator,
@@ -465,21 +1328,27 @@ button.shell-window__traffic-light:focus-visible {
 .shell-toolbar__trailing {
   display: inline-flex;
   align-items: center;
-  gap: 0.44rem;
+  justify-content: flex-end;
+  gap: 0.34rem;
+  min-width: var(--shell-toolbar-side-width);
 }
 
 .shell-toolbar__view-controls {
   display: inline-flex;
   align-items: center;
-  padding: 0.14rem;
-  border: 1px solid color-mix(in srgb, var(--shell-control-border) 78%, transparent);
+  padding: 0.1rem;
+  border: 1px solid color-mix(in srgb, var(--shell-control-border) 64%, transparent);
   border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--shell-control-surface) 78%, transparent);
+  background: color-mix(in srgb, var(--shell-control-surface) 58%, transparent);
   box-shadow:
-    0 2px 6px rgba(89, 103, 130, 0.035),
-    inset 0 1px 0 rgba(255, 255, 255, 0.62);
+    0 1px 3px rgba(89, 103, 130, 0.028),
+    inset 0 1px 0 rgba(255, 255, 255, 0.52);
   backdrop-filter: blur(10px) saturate(132%);
   -webkit-backdrop-filter: blur(10px) saturate(132%);
+  transition:
+    background-color var(--shell-duration-mid) var(--shell-ease-out),
+    border-color var(--shell-duration-mid) var(--shell-ease-out),
+    box-shadow var(--shell-duration-mid) var(--shell-ease-out);
 }
 
 .shell-view-toggle {
@@ -489,8 +1358,8 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-view-toggle__button {
-  width: 1.84rem;
-  height: 1.74rem;
+  width: 1.8rem;
+  height: 1.7rem;
   display: inline-grid;
   place-items: center;
   border: 1px solid transparent;
@@ -519,21 +1388,24 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-view-toggle__button.is-active {
-  background: color-mix(in srgb, var(--shell-selection-strong) 38%, var(--shell-control-hover) 62%);
-  border-color: color-mix(in srgb, var(--shell-control-border) 82%, transparent);
+  transform: translateY(-0.01rem);
+  background: color-mix(in srgb, var(--shell-selection-strong) 30%, var(--shell-control-hover) 70%);
+  border-color: color-mix(in srgb, var(--shell-control-border) 72%, transparent);
   box-shadow:
-    0 1px 2px rgba(101, 118, 148, 0.045),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    0 1px 2px rgba(101, 118, 148, 0.032),
+    inset 0 1px 0 rgba(255, 255, 255, 0.44);
   color: var(--shell-text-strong);
 }
 
 .shell-view-toggle__button:active {
+  transform: scale(0.985);
   background: color-mix(in srgb, var(--shell-control-active) 88%, transparent);
 }
 
 .shell-view-toggle__icon {
-  width: 1rem;
-  height: 1rem;
+  width: 0.94rem;
+  height: 0.94rem;
+  transform: translateY(-0.01rem);
 }
 
 .shell-toolbar__count,
@@ -576,6 +1448,10 @@ button.shell-window__traffic-light:focus-visible {
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(16px) saturate(134%);
   -webkit-backdrop-filter: blur(16px) saturate(134%);
+  transition:
+    background var(--shell-duration-mid) var(--shell-ease-out),
+    border-color var(--shell-duration-mid) var(--shell-ease-out),
+    box-shadow var(--shell-duration-mid) var(--shell-ease-out);
 }
 
 .shell-sidebar__nav,
@@ -592,13 +1468,18 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-sidebar__item {
+  --shell-sidebar-leading-width: 1rem;
+  --shell-sidebar-trailing-width: 1.4rem;
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns:
+    var(--shell-sidebar-leading-width)
+    minmax(0, 1fr)
+    minmax(var(--shell-sidebar-trailing-width), auto);
   align-items: center;
-  gap: 0.5rem;
+  column-gap: 0.42rem;
   min-height: 1.96rem;
-  padding: 0 0.62rem;
+  padding: 0 0.56rem;
   border: 1px solid transparent;
   border-radius: 0.72rem;
   background: transparent;
@@ -617,24 +1498,37 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-sidebar__item--parent {
-  grid-template-columns: auto minmax(0, 1fr);
+  --shell-sidebar-leading-width: 0.94rem;
 }
 
+.shell-sidebar__item-leading,
 .shell-sidebar__item-main {
   position: relative;
   z-index: 1;
+  display: inline-grid;
+  align-items: center;
+}
+
+.shell-sidebar__item-leading {
+  justify-items: center;
+  width: var(--shell-sidebar-leading-width);
+  color: color-mix(in srgb, var(--shell-text-soft) 82%, var(--shell-text) 18%);
+}
+
+.shell-sidebar__item-main {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
   min-width: 0;
+  min-height: 1.96rem;
 }
 
 .shell-sidebar__item-icon {
   display: block;
-  width: 0.98rem;
-  height: 0.98rem;
-  color: color-mix(in srgb, var(--shell-text-soft) 82%, var(--shell-text) 18%);
+  width: 0.94rem;
+  height: 0.94rem;
+  color: inherit;
   flex: none;
+  transform: translateY(-0.01rem);
 }
 
 .shell-sidebar__tree-cue {
@@ -642,37 +1536,40 @@ button.shell-window__traffic-light:focus-visible {
   z-index: 1;
   display: inline-grid;
   place-items: center;
-  width: 0.94rem;
-  color: var(--shell-text-soft);
+  width: 100%;
+  color: inherit;
 }
 
 .shell-sidebar__tree-icon {
-  width: 0.78rem;
-  height: 0.78rem;
+  width: 0.74rem;
+  height: 0.74rem;
+  transform: translateY(-0.02rem);
 }
 
 .shell-sidebar__children {
-  margin-left: 1.08rem;
+  margin-left: 0.94rem;
   display: grid;
   gap: 0.14rem;
 }
 
 .shell-sidebar__item--child {
   min-height: 1.96rem;
-  padding-left: 0.62rem;
 }
 
 .shell-sidebar__item:focus-visible {
+  background: color-mix(in srgb, var(--shell-row-hover) 78%, white 22%);
   border-color: color-mix(in srgb, var(--shell-control-border) 96%, transparent);
   box-shadow: 0 0 0 3px var(--shell-focus-ring);
   outline: none;
 }
 
 .shell-sidebar__item:active {
+  transform: scale(0.995);
   background: color-mix(in srgb, var(--shell-row-hover) 74%, var(--shell-selection) 26%);
 }
 
 .shell-sidebar__item.is-active {
+  transform: translateY(-0.01rem);
   background: color-mix(in srgb, var(--shell-row-hover) 82%, white 18%);
   border-color: color-mix(in srgb, var(--shell-control-border) 80%, transparent);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.44);
@@ -680,6 +1577,7 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-sidebar__item-label,
+.shell-sidebar__item-trailing,
 .shell-sidebar__item-count {
   position: relative;
   z-index: 1;
@@ -692,18 +1590,27 @@ button.shell-window__traffic-light:focus-visible {
   text-overflow: ellipsis;
   font-size: 0.84rem;
   font-weight: 540;
+  line-height: 1.18;
   letter-spacing: -0.012em;
 }
 
 .shell-sidebar__item--parent .shell-sidebar__item-label {
   font-size: 0.84rem;
-  font-weight: 570;
+  font-weight: 565;
   color: color-mix(in srgb, var(--shell-text) 90%, var(--shell-text-soft) 10%);
+}
+
+.shell-sidebar__item-trailing {
+  min-width: var(--shell-sidebar-trailing-width);
+  display: inline-flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .shell-sidebar__item-count {
   color: color-mix(in srgb, var(--shell-text-soft) 88%, var(--shell-text) 12%);
   min-width: 1rem;
+  line-height: 1;
   font-size: 0.71rem;
   font-weight: 580;
   font-variant-numeric: tabular-nums;
@@ -715,6 +1622,7 @@ button.shell-window__traffic-light:focus-visible {
   color: color-mix(in srgb, var(--shell-text-soft) 72%, var(--shell-text) 28%);
 }
 
+.shell-sidebar__item.is-active .shell-sidebar__item-leading,
 .shell-sidebar__item.is-active .shell-sidebar__item-icon,
 .shell-sidebar__item.is-active .shell-sidebar__tree-cue {
   color: color-mix(in srgb, var(--shell-text-soft) 76%, var(--shell-text) 24%);
@@ -761,8 +1669,8 @@ button.shell-window__traffic-light:focus-visible {
   --shell-folder-current-shadow: var(--shell-folder-shadow);
   display: grid;
   justify-items: center;
-  gap: 0.62rem;
-  padding: 0.36rem;
+  gap: 0.58rem;
+  padding: 0.34rem;
   border: 0;
   background: transparent;
   color: var(--shell-text);
@@ -791,8 +1699,8 @@ button.shell-window__traffic-light:focus-visible {
 .shell-icon-item__copy {
   display: grid;
   justify-items: center;
-  gap: 0.18rem;
-  padding: 0.08rem 0.36rem;
+  gap: 0.14rem;
+  padding: 0.06rem 0.34rem;
   border-radius: 0.58rem;
   transition:
     background-color var(--shell-duration-fast) var(--shell-ease-out),
@@ -804,6 +1712,7 @@ button.shell-window__traffic-light:focus-visible {
   display: inline-flex;
   justify-content: center;
   min-width: 4rem;
+  line-height: 1.16;
   font-size: 0.86rem;
   font-weight: 540;
   letter-spacing: -0.014em;
@@ -811,7 +1720,7 @@ button.shell-window__traffic-light:focus-visible {
 
 .shell-icon-item__caption {
   font-size: 0.72rem;
-  line-height: 1.35;
+  line-height: 1.28;
   letter-spacing: -0.005em;
   color: color-mix(in srgb, var(--shell-text-soft) 84%, transparent);
 }
@@ -820,6 +1729,12 @@ button.shell-window__traffic-light:focus-visible {
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   min-height: 0;
+}
+
+.shell-list-region {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
 }
 
 .shell-view--list,
@@ -855,13 +1770,14 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-list__link {
+  --shell-list-meta-width: 4.8rem;
   width: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(var(--shell-list-meta-width), auto);
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  column-gap: 0.84rem;
   min-height: 2.52rem;
-  padding: 0.84rem 0.94rem;
+  padding: 0.82rem 0.92rem;
   border: 1px solid color-mix(in srgb, var(--shell-line) 52%, transparent);
   border-radius: 0.82rem;
   background:
@@ -889,18 +1805,20 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-list__link:focus-visible {
+  background: color-mix(in srgb, var(--shell-row-hover) 78%, white 22%);
   border-color: color-mix(in srgb, var(--shell-control-border) 96%, transparent);
   box-shadow: 0 0 0 3px var(--shell-focus-ring);
   outline: none;
 }
 
 .shell-list__link:active {
+  transform: scale(0.995);
   background: color-mix(in srgb, var(--shell-row-hover) 74%, var(--shell-selection) 26%);
 }
 
 .shell-list__link--document-row {
-  min-height: 4.1rem;
-  padding: 0.88rem 0.94rem;
+  min-height: 4.02rem;
+  padding: 0.8rem 0.92rem;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.08)),
     color-mix(in srgb, var(--shell-surface-paper) 96%, transparent);
@@ -915,7 +1833,7 @@ button.shell-window__traffic-light:focus-visible {
 .shell-list__name {
   display: inline-flex;
   align-items: center;
-  gap: 0.72rem;
+  gap: 0.68rem;
   min-width: 0;
 }
 
@@ -923,23 +1841,28 @@ button.shell-window__traffic-light:focus-visible {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
-  gap: 0.7rem;
+  gap: 0.66rem;
 }
 
 .shell-list__name--document {
   gap: 0.72rem;
 }
 
+.shell-list__name--document-no-icon {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
 .shell-list__copy {
   min-width: 0;
   display: grid;
-  gap: 0.22rem;
+  gap: 0.18rem;
 }
 
 .shell-list__icon {
   position: relative;
-  width: 1.22rem;
-  height: 0.96rem;
+  width: 1.18rem;
+  height: 0.94rem;
   flex: none;
   border: 1px solid color-mix(in srgb, var(--shell-folder-stroke) 92%, rgba(72, 103, 154, 0.05));
   border-radius: 0.32rem;
@@ -948,8 +1871,9 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-list__icon--document {
-  width: 1.06rem;
-  height: 1.28rem;
+  width: 1.04rem;
+  height: 1.24rem;
+  margin-top: 0.02rem;
   border-radius: 0.26rem;
   background: color-mix(in srgb, var(--shell-surface-paper-muted) 82%, white 18%);
   border-color: color-mix(in srgb, var(--shell-line-strong) 90%, rgba(89, 103, 129, 0.05));
@@ -961,9 +1885,9 @@ button.shell-window__traffic-light:focus-visible {
 .shell-list__icon::before {
   content: '';
   position: absolute;
-  top: -0.22rem;
-  left: 0.14rem;
-  width: 0.42rem;
+  top: -0.2rem;
+  left: 0.13rem;
+  width: 0.4rem;
   height: 0.22rem;
   border: 1px solid var(--shell-folder-stroke);
   border-bottom: 0;
@@ -987,6 +1911,7 @@ button.shell-window__traffic-light:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.16;
   font-size: 0.92rem;
   font-weight: 575;
   letter-spacing: -0.014em;
@@ -999,7 +1924,7 @@ button.shell-window__traffic-light:focus-visible {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.79rem;
-  line-height: 1.45;
+  line-height: 1.34;
   letter-spacing: -0.006em;
   color: color-mix(in srgb, var(--shell-text-soft) 84%, var(--shell-text) 16%);
 }
@@ -1008,17 +1933,21 @@ button.shell-window__traffic-light:focus-visible {
   flex: none;
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
+  min-width: var(--shell-list-meta-width);
+  text-align: right;
 }
 
 .shell-list__meta--order {
-  min-width: 1.4rem;
-  justify-content: flex-end;
-  padding-left: 0.72rem;
+  align-self: start;
+  padding-top: 0.08rem;
+  padding-left: 0;
 }
 
 .shell-list__meta--quiet {
   font-size: 0.74rem;
   font-weight: 565;
+  line-height: 1.1;
   letter-spacing: -0.011em;
   color: color-mix(in srgb, var(--shell-text-soft) 78%, var(--shell-text) 22%);
 }
@@ -1026,7 +1955,7 @@ button.shell-window__traffic-light:focus-visible {
 .shell-list__order {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   min-width: auto;
   min-height: auto;
   padding: 0;
@@ -1041,22 +1970,27 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-list__empty-state {
+  width: 100%;
   height: 100%;
+  box-sizing: border-box;
   display: grid;
-  place-content: center;
+  align-content: start;
   justify-items: start;
-  gap: 0.46rem;
-  padding: 1.3rem 1.1rem;
+  gap: 0.34rem;
+  padding: 0.8rem 0.68rem 0.68rem;
 }
 
 .shell-list__empty {
+  margin: 0;
+  max-width: 18rem;
   color: color-mix(in srgb, var(--shell-text-soft) 88%, var(--shell-text) 12%);
 }
 
 .shell-list__empty-copy {
-  max-width: 28rem;
-  font-size: 0.86rem;
-  line-height: 1.55;
+  margin: 0;
+  max-width: 24rem;
+  font-size: 0.84rem;
+  line-height: 1.5;
   color: color-mix(in srgb, var(--shell-text-soft) 92%, transparent);
 }
 
@@ -1075,6 +2009,7 @@ button.shell-window__traffic-light:focus-visible {
 
 .about-window {
   position: relative;
+  isolation: isolate;
   width: 100%;
   height: 100%;
   min-width: 0;
@@ -1084,16 +2019,47 @@ button.shell-window__traffic-light:focus-visible {
   overflow: hidden;
   border: 1px solid var(--shell-window-border);
   border-radius: 1.18rem;
-  background: var(--shell-surface-paper);
-  box-shadow: var(--shell-window-shadow);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  background: var(--shell-surface-chrome);
+  box-shadow:
+    var(--shell-solid-window-shadow),
+    0 14px 26px rgba(66, 80, 104, 0.022);
+  backdrop-filter: blur(22px) saturate(154%);
+  -webkit-backdrop-filter: blur(22px) saturate(154%);
 }
 
-.about-window__titlebar {
+.about-window::before,
+.about-window::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.about-window::before {
+  z-index: 0;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 248, 252, 0.94)),
-    rgba(246, 249, 253, 0.98);
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.64),
+      transparent 18%,
+      transparent 100%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.16),
+      transparent 28%,
+      transparent 74%,
+      rgba(136, 156, 192, 0.06)
+    );
+  opacity: 0.92;
+}
+
+.about-window::after {
+  z-index: 0;
+  box-shadow:
+    inset 0 1px 0 var(--shell-glass-highlight),
+    inset 0 0 0 1px color-mix(in srgb, var(--shell-glass-edge) 82%, transparent);
 }
 
 .about-window__traffic {
@@ -1104,15 +2070,26 @@ button.shell-window__traffic-light:focus-visible {
   padding: 0;
   border: 0;
   cursor: pointer;
-  transition: box-shadow var(--shell-duration-mid) var(--shell-ease-out);
+  transition:
+    transform var(--shell-duration-fast) var(--shell-ease-out),
+    box-shadow var(--shell-duration-mid) var(--shell-ease-out),
+    filter var(--shell-duration-fast) var(--shell-ease-out);
 }
 
 .about-window__close:focus-visible {
+  filter: saturate(1.02);
   box-shadow: 0 0 0 3px var(--shell-focus-ring);
   outline: none;
 }
 
+.about-window__close:active,
+.project-window__close:active {
+  transform: scale(0.985);
+}
+
 .about-window__stage {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
@@ -1120,152 +2097,313 @@ button.shell-window__traffic-light:focus-visible {
   border-radius: 0 0 inherit inherit;
 }
 
-.about-window__stage > .shell-document {
+.about-window__stage::after {
+  content: none;
+}
+
+.about-window__stage > .about-note {
   height: 100%;
 }
 
-.shell-document {
+.about-note {
+  position: relative;
+  isolation: isolate;
   height: 100%;
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   min-height: 0;
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--shell-surface-paper) 90%, transparent), transparent 2.5rem),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.04) 10%,
+      rgba(255, 255, 255, 0) 18%
+    ),
+    linear-gradient(
+      180deg,
+      transparent 0,
+      transparent 2.9rem,
+      rgba(138, 154, 182, 0.06) 2.9rem,
+      transparent 3rem
+    ),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0,
+      transparent 2.76rem,
+      rgba(138, 154, 182, 0.038) 2.76rem,
+      rgba(138, 154, 182, 0.038) 2.82rem,
+      transparent 2.82rem,
+      transparent 5.58rem
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--shell-surface-paper) 90%, transparent),
+      transparent 2.8rem
+    ),
     var(--shell-surface-paper-muted);
 }
 
-.shell-document__body {
-  min-height: 0;
-  overflow: auto;
-  padding: 1.38rem 2.08rem 2.48rem 1.08rem;
-  scrollbar-gutter: stable;
-}
-
-.shell-document__lines {
-  position: relative;
-  width: min(100%, 49rem);
-}
-
-.shell-document__lines::before {
+.about-note::before,
+.about-note::after {
   content: '';
   position: absolute;
-  top: 0.16rem;
-  bottom: 0.16rem;
-  left: 3.02rem;
-  width: 1px;
-  background: color-mix(in srgb, var(--shell-line) 68%, transparent);
+  pointer-events: none;
 }
 
-.shell-document__line {
-  display: grid;
-  grid-template-columns: 2.72rem minmax(0, 1fr);
-  gap: 1.22rem;
-  align-items: start;
-  min-height: 1.88rem;
+.about-note::before {
+  top: 0;
+  right: 0;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-top-right-radius: inherit;
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(233, 238, 246, 0.66));
+  box-shadow:
+    inset 1px -1px 0 rgba(148, 162, 184, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.38);
+  opacity: 0.66;
 }
 
-.shell-document__line + .shell-document__line {
-  margin-top: 0.14rem;
+.about-note::after {
+  top: 0.96rem;
+  right: 1.06rem;
+  width: 2.2rem;
+  height: 0.58rem;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(109, 123, 146, 0.068), rgba(109, 123, 146, 0.022));
+  filter: blur(1.2px);
+  opacity: 0.6;
+  transform: rotate(-35deg);
 }
 
-.shell-document__line--blank {
-  min-height: 1.08rem;
+.about-note__body {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: visible;
+  padding: 24px 16px calc(48px + env(safe-area-inset-bottom, 0px)) 24px;
 }
 
-.shell-document__line--blank + .shell-document__line--heading,
-.shell-document__line--blank + .shell-document__line--body,
-.shell-document__line--blank + .shell-document__line--list {
-  margin-top: 0.24rem;
+.about-note__title {
+  margin: 0;
+  font-size: 1.34rem;
+  font-weight: 624;
+  line-height: 1.28;
+  letter-spacing: -0.03em;
+  color: color-mix(in srgb, var(--shell-text-strong) 96%, var(--shell-text) 4%);
 }
 
-.shell-document__line--heading + .shell-document__line--body,
-.shell-document__line--heading + .shell-document__line--list {
-  margin-top: 0.08rem;
+.about-note__meta {
+  margin: -0.24rem 0 0.16rem;
+  color: color-mix(in srgb, var(--shell-text-soft) 78%, rgba(112, 124, 145, 0.7) 22%);
+  font-size: 0.69rem;
+  font-weight: 560;
+  line-height: 1.2;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
 }
 
-.shell-document__gutter {
-  padding: 0.12rem 0.74rem 0 0;
-  color: color-mix(in srgb, var(--shell-text-soft) 58%, transparent);
-  font-family:
-    ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    monospace;
-  font-size: 0.72rem;
-  line-height: 1.56;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  user-select: none;
-}
-
-.shell-document__content {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.54rem;
-  min-width: 0;
-  padding-left: 0.14rem;
-}
-
-.shell-document__marker {
-  flex: none;
-  min-width: 1.14rem;
-  color: color-mix(in srgb, var(--shell-text-soft) 54%, transparent);
-  font-family:
-    ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    monospace;
-  font-size: 0.72rem;
-  line-height: 1.72rem;
-  text-align: right;
-  user-select: none;
-}
-
-.shell-document__text {
-  max-width: 43rem;
-  min-width: 0;
-  font-family: var(--shell-font-ui);
-  font-size: 0.95rem;
-  font-weight: 430;
-  line-height: 1.82;
-  letter-spacing: -0.013em;
-  white-space: pre-wrap;
+.about-note__paragraph {
+  margin: 0;
+  font-size: 0.97rem;
+  font-weight: 432;
+  line-height: 1.62;
+  letter-spacing: -0.014em;
   color: color-mix(in srgb, var(--shell-text) 84%, var(--shell-text-soft) 16%);
 }
 
-.shell-document__line--title {
-  min-height: 2.18rem;
+.about-note__highlight,
+.about-note__emphasis {
+  display: inline;
+  padding: 0;
+  white-space: nowrap;
+  color: #502BA0;
+  background: none;
+  text-decoration-line: underline;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 0.09em;
+  text-underline-offset: 0.14em;
 }
 
-.shell-document__line--title .shell-document__marker {
-  font-size: 0.78rem;
-  line-height: 1.94rem;
+.about-note__highlight {
 }
 
-.shell-document__line--title .shell-document__text {
-  font-size: 1.28rem;
-  font-weight: 635;
-  line-height: 1.48;
-  letter-spacing: -0.028em;
-  color: var(--shell-text-strong);
+.about-note__emphasis {
 }
 
-.shell-document__line--heading .shell-document__text {
-  font-size: 1rem;
-  font-weight: 598;
-  line-height: 1.68;
-  letter-spacing: -0.018em;
-  color: color-mix(in srgb, var(--shell-text-strong) 86%, var(--shell-text) 14%);
+.about-note__signature {
+  margin: auto 0 0;
+  width: fit-content;
+  max-width: none;
+  padding-top: 0.34rem;
+  padding-bottom: 0.18rem;
+  color: color-mix(in srgb, var(--shell-text) 68%, var(--shell-text-soft) 32%);
+  font-family: 'Segoe Script', 'Snell Roundhand', 'Bradley Hand', 'Brush Script MT',
+    'Apple Chancery', 'Lucida Handwriting', cursive;
+  font-size: 1.76rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: 0.006em;
+  text-rendering: geometricPrecision;
+  transform-origin: 0% 100%;
 }
 
-.shell-document__line--body .shell-document__text,
-.shell-document__line--list .shell-document__text {
-  font-weight: 432;
+.about-note__title,
+.about-note__meta,
+.about-note__paragraph,
+.about-note__highlight,
+.about-note__emphasis,
+.about-note__signature {
+  display: none;
 }
 
-.shell-document__line--list .shell-document__text {
-  color: color-mix(in srgb, var(--shell-text) 82%, var(--shell-text-soft) 18%);
+.about-note-composition {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: max-content;
+  max-width: 100%;
+  color: #7e7e7e;
+  font-family: 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
 }
 
-.shell-document__line--blank .shell-document__content,
-.shell-document__line--blank .shell-document__text {
-  min-height: 1.08rem;
+.about-note-composition__avatar-wrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+}
+
+.about-note-composition__avatar {
+  display: block;
+  width: 56px;
+  height: 56px;
+  border-radius: 20px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.about-note-composition__status {
+  position: absolute;
+  right: -6px;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #16bf5e;
+  box-shadow:
+    0 0 0 3px #f6f8fb,
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.about-note-composition__identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 16px;
+}
+
+.about-note-composition__name-row {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.about-note-composition__name {
+  margin: 0;
+  color: #121212;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.015em;
+}
+
+.about-note-composition__badge {
+  width: 16px;
+  height: 16px;
+  margin-top: 0px;
+  flex: 0 0 auto;
+}
+
+.about-note-composition__role {
+  margin: 0px 0 0;
+  color: #7e7e7e;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: -0.012em;
+}
+
+.about-note-composition__copy {
+  display: grid;
+  justify-items: start;
+  row-gap: 4px;
+  margin-top: 16px;
+}
+
+.about-note-composition__line {
+  margin: 0;
+  color: #7e7e7e;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: -0.014em;
+  white-space: nowrap;
+}
+
+.about-note-composition__strong {
+  color: #121212;
+  font-weight: 500;
+}
+
+.about-note-composition__line--bugged {
+  display: block;
+}
+
+.about-note-composition__bug-replacement {
+  display: inline-block;
+  width: 24px;
+  height: 18px;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.about-note-composition__bug {
+  position: absolute;
+  left: 1px;
+  top: 2px;
+  display: block;
+  width: 20px;
+  height: 20px;
+  transform: translateX(1px) rotate(330deg);
+  transform-origin: center;
+}
+
+.about-note-composition__click-wrap {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 24px;
+}
+
+.about-note-composition__click-text {
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+.about-note-composition__cursor {
+  position: absolute;
+  left: calc(100% - 11px);
+  top: 14px;
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
 }
 
 .shell-dock {
@@ -1274,24 +2412,27 @@ button.shell-window__traffic-light:focus-visible {
 
 .shell-dock__inner {
   --shell-dock-scale: 1.25;
-  --shell-dock-min-height: calc(5.42rem * var(--shell-dock-scale));
+  --shell-dock-min-height: calc(4.95rem * var(--shell-dock-scale));
   --shell-dock-gap: calc(0.68rem * var(--shell-dock-scale));
-  --shell-dock-padding-inline: calc(0.94rem * var(--shell-dock-scale));
-  --shell-dock-padding-top: calc(0.7rem * var(--shell-dock-scale));
-  --shell-dock-padding-bottom: calc(0.86rem * var(--shell-dock-scale));
+  --shell-dock-padding-inline: calc(0.68rem * var(--shell-dock-scale));
+  --shell-dock-padding-top: calc(0.68rem * var(--shell-dock-scale));
+  --shell-dock-padding-bottom: calc(0.68rem * var(--shell-dock-scale));
   --shell-dock-radius: calc(1.52rem * var(--shell-dock-scale));
   --shell-dock-button-width: calc(3.14rem * var(--shell-dock-scale));
-  --shell-dock-button-height: calc(4.02rem * var(--shell-dock-scale));
+  --shell-dock-button-height: calc(3.85rem * var(--shell-dock-scale));
   --shell-dock-row-gap: calc(0.3rem * var(--shell-dock-scale));
   --shell-dock-frame-size: calc(2.98rem * var(--shell-dock-scale));
   --shell-dock-frame-radius: calc(0.96rem * var(--shell-dock-scale));
-  --shell-dock-frame-inset: calc(0.18rem * var(--shell-dock-scale));
+  --shell-dock-frame-inset: calc(0.2rem * var(--shell-dock-scale));
   --shell-dock-launcher-size: calc(2.22rem * var(--shell-dock-scale));
   --shell-dock-indicator-size: calc(0.25rem * var(--shell-dock-scale));
   --shell-dock-hover-lift: -0.375rem;
   --shell-dock-hover-scale: 1.08;
   --shell-dock-press-scale: 0.96;
   pointer-events: auto;
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
   min-height: var(--shell-dock-min-height);
   display: inline-flex;
   align-items: flex-end;
@@ -1300,15 +2441,46 @@ button.shell-window__traffic-light:focus-visible {
     var(--shell-dock-padding-top)
     var(--shell-dock-padding-inline)
     var(--shell-dock-padding-bottom);
-  border: 1px solid color-mix(in srgb, var(--shell-dock-border) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--shell-solid-window-border) 82%, rgba(255, 255, 255, 0.28));
   border-radius: var(--shell-dock-radius);
-  background: var(--shell-surface-float);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(244, 248, 253, 0.22)),
+    color-mix(in srgb, var(--shell-surface-chrome) 74%, var(--shell-surface-paper) 26%);
   box-shadow:
-    var(--shell-dock-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(24px) saturate(175%);
-  -webkit-backdrop-filter: blur(24px) saturate(175%);
+    0 22px 38px rgba(66, 80, 104, 0.11),
+    0 10px 22px rgba(66, 80, 104, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(22px) saturate(126%);
+  -webkit-backdrop-filter: blur(22px) saturate(126%);
+}
+
+.shell-dock__inner::before,
+.shell-dock__inner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.shell-dock__inner::before {
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.34), transparent 44%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 38%, transparent 72%),
+    linear-gradient(180deg, rgba(214, 224, 237, 0.22), rgba(214, 224, 237, 0.08));
+  opacity: 0.94;
+}
+
+.shell-dock__inner::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(17, 24, 34, 0.08));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
+    inset 0 0 0 1px color-mix(in srgb, var(--shell-solid-window-edge) 64%, transparent);
+}
+
+.shell-dock__inner > * {
+  position: relative;
+  z-index: 1;
 }
 
 .shell-dock__button {
@@ -1324,8 +2496,8 @@ button.shell-window__traffic-light:focus-visible {
   color: var(--shell-dock-icon);
   cursor: pointer;
   transition:
-    opacity var(--shell-duration-fast) ease,
-    color var(--shell-duration-fast) ease;
+    opacity var(--shell-duration-fast) var(--shell-ease-out),
+    color var(--shell-duration-fast) var(--shell-ease-out);
 }
 
 .shell-dock__button:focus-visible {
@@ -1345,8 +2517,8 @@ button.shell-window__traffic-light:focus-visible {
   place-items: center;
   transform-origin: 50% 100%;
   transition:
-    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    filter 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform var(--shell-duration-mid) var(--shell-ease-out),
+    filter var(--shell-duration-mid) var(--shell-ease-out);
 }
 
 .shell-dock__icon-frame {
@@ -1357,21 +2529,21 @@ button.shell-window__traffic-light:focus-visible {
   place-items: center;
   overflow: hidden;
   border-radius: var(--shell-dock-frame-radius);
-  border: 1px solid color-mix(in srgb, var(--shell-dock-border) 90%, rgba(148, 167, 194, 0.16));
+  border: 1px solid color-mix(in srgb, var(--shell-dock-border) 94%, rgba(148, 167, 194, 0.16));
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(234, 240, 248, 0.72));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(235, 241, 249, 0.76));
   box-shadow:
-    0 10px 24px rgba(77, 90, 112, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.88),
-    inset 0 -1px 0 rgba(148, 167, 194, 0.14);
+    0 12px 26px rgba(77, 90, 112, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(148, 167, 194, 0.18);
   transform: scale(1);
   transition:
     transform var(--shell-duration-fast) var(--shell-ease-out),
     filter var(--shell-duration-fast) var(--shell-ease-out),
     box-shadow var(--shell-duration-fast) var(--shell-ease-out),
     background var(--shell-duration-fast) var(--shell-ease-out),
-    border-color var(--shell-duration-fast) ease,
-    opacity var(--shell-duration-fast) ease;
+    border-color var(--shell-duration-fast) var(--shell-ease-out),
+    opacity var(--shell-duration-fast) var(--shell-ease-out);
 }
 
 .shell-dock__icon-frame::before {
@@ -1380,15 +2552,15 @@ button.shell-window__traffic-light:focus-visible {
   inset: var(--shell-dock-frame-inset);
   border-radius: inherit;
   background:
-    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.74), transparent 68%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.04));
-  border: 1px solid color-mix(in srgb, var(--shell-dock-border) 72%, rgba(151, 169, 194, 0.2));
-  opacity: 0.88;
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.7), transparent 68%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.06));
+  border: 1px solid color-mix(in srgb, var(--shell-dock-border) 76%, rgba(151, 169, 194, 0.2));
+  opacity: 0.9;
   transform: scale(1);
   transition:
-    opacity var(--shell-duration-fast) ease,
+    opacity var(--shell-duration-fast) var(--shell-ease-out),
     transform var(--shell-duration-fast) var(--shell-ease-out),
-    border-color var(--shell-duration-fast) ease;
+    border-color var(--shell-duration-fast) var(--shell-ease-out);
 }
 
 .shell-dock__button:focus-visible .shell-dock__icon-frame {
@@ -1427,21 +2599,26 @@ button.shell-window__traffic-light:focus-visible {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(0.04rem * var(--shell-dock-scale));
+  bottom: calc(
+    (
+      (var(--shell-dock-button-height) - var(--shell-dock-frame-size)) -
+      var(--shell-dock-padding-bottom)
+    ) / 2 - (var(--shell-dock-indicator-size) / 2)
+  );
   margin-inline: auto;
   width: var(--shell-dock-indicator-size);
   height: var(--shell-dock-indicator-size);
   border-radius: 999px;
   background: var(--shell-indicator);
   transition:
-    opacity var(--shell-duration-fast) ease,
-    background-color var(--shell-duration-fast) ease;
+    opacity var(--shell-duration-fast) var(--shell-ease-out),
+    background-color var(--shell-duration-fast) var(--shell-ease-out);
 }
 
 .shell-dock__tooltip {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--shell-dock-frame-size) + (0.52rem * var(--shell-dock-scale)));
+  bottom: calc(var(--shell-dock-frame-size) + (0.92rem * var(--shell-dock-scale)));
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1460,6 +2637,7 @@ button.shell-window__traffic-light:focus-visible {
   white-space: nowrap;
   pointer-events: none;
   transform: translateX(-50%);
+  z-index: 2;
   animation: shell-dock-tooltip-enter 140ms ease-out;
 }
 
@@ -1602,12 +2780,25 @@ button.shell-window__traffic-light:focus-visible {
 }
 
 .shell-not-found__link:active {
+  transform: scale(0.985);
   background: color-mix(in srgb, var(--shell-control-active) 92%, transparent);
 }
 
 @media (hover: hover) and (pointer: fine) {
+  .shell-system-bar__menu-item:hover,
+  .shell-system-bar__menu-item:focus-visible {
+    background-color: var(--shell-menubar-text-hover);
+    color: var(--shell-menubar-text);
+  }
+
+  .shell-background-menu__option:hover,
+  .shell-background-menu__option:focus-visible {
+    background: var(--shell-menubar-menu-selected);
+  }
+
   .shell-window__traffic:hover .shell-window__traffic-light,
   .shell-window__traffic:focus-within .shell-window__traffic-light {
+    transform: scale(1.02);
     filter: saturate(1.02);
   }
 
@@ -1646,21 +2837,54 @@ button.shell-window__traffic-light:focus-visible {
     transform: translate(-50%, -50%) rotate(90deg) scaleX(1);
   }
 
+  .weather-widget__refresh:hover,
+  .weather-widget__refresh:focus-visible {
+    transform: translateY(-0.01rem);
+    border-color: color-mix(in srgb, var(--shell-control-border) 96%, transparent);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0.12)),
+      color-mix(in srgb, var(--shell-control-hover) 72%, var(--shell-control-surface) 28%);
+    box-shadow:
+      0 7px 14px rgba(89, 103, 130, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.56);
+    color: var(--shell-text);
+  }
+
   .shell-toolbar__back:hover {
+    transform: translateY(-0.01rem);
     border-color: var(--shell-control-border);
     background: var(--shell-control-surface);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48);
     color: var(--shell-text);
   }
 
+  .shell-toolbar__back:focus-visible {
+    transform: translateY(-0.01rem);
+  }
+
   .shell-view-toggle__button:hover {
+    transform: translateY(-0.01rem);
     background: color-mix(in srgb, var(--shell-control-hover) 84%, transparent);
     border-color: color-mix(in srgb, var(--shell-control-border) 96%, transparent);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48);
     color: var(--shell-text);
   }
 
+  .shell-view-toggle__button:focus-visible {
+    transform: translateY(-0.01rem);
+  }
+
+  .shell-view-toggle__button.is-active:hover,
+  .shell-view-toggle__button.is-active:focus-visible {
+    background: color-mix(in srgb, var(--shell-selection-strong) 34%, var(--shell-control-hover) 66%);
+    border-color: color-mix(in srgb, var(--shell-control-border) 78%, transparent);
+    box-shadow:
+      0 1px 2px rgba(101, 118, 148, 0.036),
+      inset 0 1px 0 rgba(255, 255, 255, 0.48);
+  }
+
   .shell-sidebar__item:hover {
+    transform: translateY(-0.01rem);
     background: color-mix(in srgb, var(--shell-row-hover) 76%, white 24%);
     border-color: color-mix(in srgb, var(--shell-control-border) 76%, transparent);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.44);
@@ -1686,8 +2910,13 @@ button.shell-window__traffic-light:focus-visible {
   }
 
   .shell-list__link:hover {
+    transform: translateY(-0.01rem);
     background: color-mix(in srgb, var(--shell-row-hover) 76%, white 24%);
     border-color: color-mix(in srgb, var(--shell-control-border) 64%, transparent);
+  }
+
+  .shell-list__link:focus-visible {
+    transform: translateY(-0.01rem);
   }
 
   .shell-icon-item:hover {
@@ -1725,12 +2954,39 @@ button.shell-window__traffic-light:focus-visible {
   }
 
   .shell-not-found__link:hover {
+    transform: translateY(-0.01rem);
     border-color: var(--shell-line-stronger);
     background: var(--shell-control-hover);
   }
 }
 
+@media (max-width: 1120px) {
+  .shell-system-bar__menu-item--background {
+    display: none;
+  }
+}
+
+@media (max-width: 1040px) {
+  .shell-system-bar__menu-item--window {
+    display: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .shell-system-bar__menu-item--go {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
+  .shell-system-bar__menu-item--view {
+    display: none;
+  }
+
+  .shell-system-bar__status-icon {
+    display: none;
+  }
+
   .shell-route {
     --shell-window-height: 33rem;
   }
@@ -1747,24 +3003,33 @@ button.shell-window__traffic-light:focus-visible {
 @media (max-width: 720px) {
   .shell-route {
     gap: 0.72rem;
-    padding: 0.08rem 0 0.64rem;
+    padding: 0 0 0.64rem;
     --shell-top-bar-padding-inline: 0.36rem;
     --shell-viewport-padding-inline: 0.36rem;
     --shell-window-height: 29rem;
   }
 
+  .shell-system-bar {
+    padding-inline: 0.75rem;
+  }
+
   .shell-system-bar__inner {
-    min-height: 1.5rem;
-    padding: 0 0.12rem;
+    min-height: var(--shell-menubar-height);
   }
 
-  .shell-system-bar__brand {
-    font-size: 0.74rem;
+  .shell-system-bar__left {
+    gap: 0.18rem;
   }
 
+  .shell-system-bar__right {
+    gap: 0.5rem;
+  }
+
+  .shell-system-bar__button,
+  .shell-system-bar__menu-item,
+  .shell-system-bar__brand,
   .shell-system-bar__time {
-    font-size: 0.64rem;
-    padding-inline: 0.12rem;
+    font-size: 13px;
   }
 
   .shell-route__viewport {
@@ -1783,9 +3048,9 @@ button.shell-window__traffic-light:focus-visible {
   .shell-dock__inner {
     --shell-dock-min-height: calc(4.48rem * var(--shell-dock-scale));
     --shell-dock-gap: calc(0.48rem * var(--shell-dock-scale));
-    --shell-dock-padding-top: calc(0.6rem * var(--shell-dock-scale));
+    --shell-dock-padding-top: calc(0.66rem * var(--shell-dock-scale));
     --shell-dock-padding-inline: calc(0.66rem * var(--shell-dock-scale));
-    --shell-dock-padding-bottom: calc(0.74rem * var(--shell-dock-scale));
+    --shell-dock-padding-bottom: calc(0.66rem * var(--shell-dock-scale));
     --shell-dock-radius: calc(1.22rem * var(--shell-dock-scale));
     --shell-dock-button-width: calc(2.58rem * var(--shell-dock-scale));
     --shell-dock-button-height: calc(3.34rem * var(--shell-dock-scale));
@@ -1797,6 +3062,11 @@ button.shell-window__traffic-light:focus-visible {
 
   .shell-window__content {
     grid-template-columns: 1fr;
+  }
+
+  .shell-window__toolbar {
+    --shell-toolbar-side-width: 3.72rem;
+    gap: 0.48rem;
   }
 
   .shell-toolbar__trailing {
@@ -1837,7 +3107,8 @@ button.shell-window__traffic-light:focus-visible {
   }
 
   .shell-list__link {
-    gap: 0.8rem;
+    --shell-list-meta-width: 4.2rem;
+    column-gap: 0.72rem;
   }
 
   .shell-list__link--document-row {
@@ -1853,31 +3124,61 @@ button.shell-window__traffic-light:focus-visible {
     align-self: center;
   }
 
-  .shell-document__body {
-    padding: 1rem 1rem 1.7rem 0.86rem;
+  .about-note__body {
+    padding: 24px 20px calc(36px + env(safe-area-inset-bottom, 0px)) 32px;
   }
 
-  .shell-document__lines::before {
-    left: 2.72rem;
+  .about-note::before {
+    width: 3rem;
+    height: 3rem;
+    opacity: 0.58;
   }
 
-  .shell-document__line {
-    grid-template-columns: 2.4rem minmax(0, 1fr);
-    gap: 0.94rem;
+  .about-note::after {
+    top: 0.84rem;
+    right: 0.92rem;
+    width: 1.92rem;
   }
 
-  .shell-document__text {
-    font-size: 0.9rem;
-    line-height: 1.7;
+  .about-note-composition__copy {
+    margin-top: 24px;
+    row-gap: 10px;
+  }
+
+  .about-note-composition__line {
+    font-size: 15px;
+    line-height: 22px;
+  }
+
+  .about-note-composition__badge {
+    width: 13px;
+    height: 13px;
+    margin-top: 4px;
+  }
+
+  .about-note-composition__cursor {
+    width: 32px;
+    height: 32px;
+    top: 14px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .shell-route::after,
+  .shell-system-bar__button,
   .shell-desktop__window-frame,
+  .shell-desktop__object,
   .shell-desktop__window-frame .shell-window,
   .shell-desktop__window-frame .about-window,
   .shell-desktop__window-frame .project-window,
+  .shell-window__title,
+  .weather-widget__refresh,
+  .weather-widget__refresh-icon,
+  .shell-toolbar__path,
+  .shell-toolbar__path-copy,
+  .shell-toolbar__path-current,
+  .shell-toolbar__view-controls,
+  .shell-sidebar,
   .shell-toolbar__back,
   .shell-view-toggle__button,
   .shell-sidebar__item,
@@ -1889,10 +3190,12 @@ button.shell-window__traffic-light:focus-visible {
   .shell-dock__motion-shell,
   .shell-dock__icon-frame,
   .shell-dock__icon-frame::before,
+  .shell-dock__indicator,
   .shell-window__traffic-light,
   .shell-window__traffic-light::before,
   .shell-window__traffic-light::after,
   .about-window__close,
+  .project-window__close,
   .shell-dock__tooltip,
   .shell-not-found__link {
     transition: none;
@@ -1900,19 +3203,63 @@ button.shell-window__traffic-light:focus-visible {
 
   .shell-dock__button:hover .shell-dock__motion-shell,
   .shell-dock__button:hover .shell-dock__icon-frame,
+  .shell-dock__button:hover .shell-dock__indicator,
+  .shell-window__traffic:hover .shell-window__traffic-light,
+  .shell-window__traffic:focus-within .shell-window__traffic-light,
   .shell-icon-item:hover .shell-icon-item__folder,
+  .weather-widget__refresh:hover,
+  .weather-widget__refresh:focus-visible,
+  .shell-toolbar__back:hover,
+  .shell-toolbar__back:focus-visible,
+  .shell-sidebar__item.is-active,
+  .shell-sidebar__item:hover,
   .shell-sidebar__item:active,
+  .shell-list__link:hover,
+  .shell-list__link:focus-visible,
   .shell-list__link:active,
   .shell-toolbar__back:active,
+  .shell-view-toggle__button.is-active,
+  .shell-view-toggle__button:hover,
+  .shell-view-toggle__button:focus-visible,
   .shell-view-toggle__button:active,
   .shell-dock__button.is-pressing .shell-dock__motion-shell,
   .shell-dock__button.is-pressing .shell-dock__icon-frame,
+  .shell-dock__button:focus-visible .shell-dock__indicator,
+  .about-window__close:active,
+  .project-window__close:active,
+  .shell-not-found__link:hover,
   .shell-not-found__link:active {
     transform: none;
     filter: none;
   }
 
+  .shell-window__traffic:hover .shell-window__traffic-light--close::before,
+  .shell-window__traffic:focus-within .shell-window__traffic-light--close::before {
+    transform: translate(-50%, -50%) rotate(45deg) scaleX(0.72);
+  }
+
+  .shell-window__traffic:hover .shell-window__traffic-light--close::after,
+  .shell-window__traffic:focus-within .shell-window__traffic-light--close::after {
+    transform: translate(-50%, -50%) rotate(-45deg) scaleX(0.72);
+  }
+
+  .shell-window__traffic:hover .shell-window__traffic-light--minimize::before,
+  .shell-window__traffic:focus-within .shell-window__traffic-light--minimize::before,
+  .shell-window__traffic:hover .shell-window__traffic-light--maximize::before,
+  .shell-window__traffic:focus-within .shell-window__traffic-light--maximize::before {
+    transform: translate(-50%, -50%) scaleX(0.72);
+  }
+
+  .shell-window__traffic:hover .shell-window__traffic-light--maximize::after,
+  .shell-window__traffic:focus-within .shell-window__traffic-light--maximize::after {
+    transform: translate(-50%, -50%) rotate(90deg) scaleX(0.72);
+  }
+
   .shell-dock__icon-frame.is-bouncing {
+    animation: none;
+  }
+
+  .weather-widget__refresh-icon.is-spinning {
     animation: none;
   }
 

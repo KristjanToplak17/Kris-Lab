@@ -10,10 +10,10 @@ export function ShellRoute() {
 
   useEffect(() => {
     document.title = activeProject
-      ? `${activeProject.title} - Kris' Lab`
+      ? `${activeProject.title} - Kris's OS`
       : missingProjectSlug
-        ? `Project unavailable - Kris' Lab`
-        : "Kris' Lab"
+        ? `Project unavailable - Kris's OS`
+        : "Kris's OS"
   }, [activeProject, missingProjectSlug])
 
   return (

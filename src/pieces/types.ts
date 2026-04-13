@@ -11,7 +11,6 @@ export interface PieceManifest {
   status: PieceStatus
   mode: PieceMode
   order: number
-  poster: string
 }
 
 export interface PieceComponentProps {
