@@ -15,9 +15,3 @@ export function getPageReveal(reducedMotion: boolean) {
     transition: { duration: 0.46, ease: shellEase },
   }
 }
-
-export function getListReveal(reducedMotion: boolean, index: number) {
-  void reducedMotion
-  void index
-  return {}
-}

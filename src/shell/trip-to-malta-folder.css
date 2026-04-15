@@ -238,6 +238,38 @@
     0 -5px 20px rgba(0, 0, 0, 0.3);
 }
 
+.projects-folder__flap-fallback {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.projects-folder__flap-fallback-stack {
+  position: absolute;
+  inset: 24px 20px;
+  transform-style: preserve-3d;
+}
+
+.projects-folder__flap-fallback-card {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 176px;
+  overflow: hidden;
+  border-radius: 12px;
+  transform-origin: bottom center;
+  filter: blur(12px) saturate(0.9);
+  opacity: 0.9;
+}
+
+.projects-folder__flap-fallback-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
 .projects-folder__flap-sheen {
   position: absolute;
   inset: -100%;

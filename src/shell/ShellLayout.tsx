@@ -16,7 +16,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getProjectPath } from '../lib/navigation'
 import { ProjectWindow } from '../host/ProjectWindow'
-import { getListReveal, shellEase } from '../lib/motion'
+import { shellEase } from '../lib/motion'
 import { usePrefersReducedMotion } from '../lib/reduced-motion'
 import {
   clampRectToBounds,
@@ -165,6 +165,14 @@ const launcherContentEnterDuration = 140
 const launcherContentExitDuration = 110
 const windowLifecycleCloseDuration = 120
 const windowLifecycleForegroundDuration = 120
+const shellMenuBarDateTimeFormatter = new Intl.DateTimeFormat('en-US', {
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  hour12: true,
+})
 
 const launcherWindowDefaults = {
   height: 560,
@@ -314,6 +322,28 @@ function getLauncherContentTransition(reducedMotion: boolean) {
       transition: { duration: launcherContentExitDuration / 1000, ease: shellEase },
     },
   }
+}
+
+function MenuBarClock() {
+  const [currentTime, setCurrentTime] = useState(() => new Date())
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [])
+
+  const label = shellMenuBarDateTimeFormatter.format(currentTime)
+
+  return (
+    <span className="shell-system-bar__time" aria-label={`Local date and time ${label}`}>
+      {label}
+    </span>
+  )
 }
 
 function LauncherFolderIcon(props: LauncherFolderIconProps) {
@@ -675,7 +705,6 @@ export function ShellLayout({
     return null
   })
   const [hoveredDockItemId, setHoveredDockItemId] = useState<string | null>(null)
-  const [currentTime, setCurrentTime] = useState(() => new Date())
   const [windowOrder, setWindowOrder] = useState<string[]>(() => {
     if (initialProjectWindowId) {
       return [initialProjectWindowId]
@@ -698,12 +727,16 @@ export function ShellLayout({
   const systemBarRef = useRef<HTMLElement>(null)
   const backgroundMenuRef = useRef<HTMLDivElement>(null)
   const dockRef = useRef<HTMLElement>(null)
+  const shellBoundsRef = useRef({ left: 0, top: 0 })
   const dockTooltipTimerRef = useRef<number | null>(null)
   const dockTooltipPrimedRef = useRef(false)
+  const windowFrameRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const weatherWidgetFrameRef = useRef<HTMLDivElement | null>(null)
   const dragSessionRef = useRef<DragSession | null>(null)
+  const draggedWindowRectRef = useRef<WindowRect | null>(null)
   const weatherWidgetDragSessionRef = useRef<DesktopObjectDragSession | null>(null)
+  const draggedWeatherWidgetRectRef = useRef<WindowRect | null>(null)
   const previousProjectWindowIdRef = useRef<string | null>(null)
-  const previousActiveWindowIdRef = useRef<string | null>(null)
   const hasMountedRef = useRef(false)
   const launcherLastKnownRectRef = useRef<WindowRect | null>(null)
   const aboutLastKnownRectRef = useRef<WindowRect | null>(null)
@@ -743,7 +776,6 @@ export function ShellLayout({
     [activeProject],
   )
   const projectWindowId = projectApp?.windowId ?? null
-  const closingProjectWindowId = closingProjectSnapshot?.app.windowId ?? null
   const backgroundMenuId = useId()
   const sidebarView: ShellView = hasMissingProject ? 'projects' : view
   const selectedBackground = useMemo<ShellBackgroundDefinition>(
@@ -837,16 +869,20 @@ export function ShellLayout({
   }
 
   useEffect(() => {
+    const enteringFrames = enteringFrameRef.current
+    const closingTimers = closingTimerRef.current
+    const foregroundingTimers = foregroundingTimerRef.current
+
     document.body.dataset.pieceMode = 'shell'
 
     return () => {
-      Object.values(enteringFrameRef.current).forEach((frameIds) => {
+      Object.values(enteringFrames).forEach((frameIds) => {
         frameIds.forEach((frameId) => window.cancelAnimationFrame(frameId))
       })
-      Object.values(closingTimerRef.current).forEach((timerId) => {
+      Object.values(closingTimers).forEach((timerId) => {
         window.clearTimeout(timerId)
       })
-      Object.values(foregroundingTimerRef.current).forEach((timerId) => {
+      Object.values(foregroundingTimers).forEach((timerId) => {
         window.clearTimeout(timerId)
       })
       delete document.body.dataset.pieceMode
@@ -866,16 +902,6 @@ export function ShellLayout({
       delete document.body.dataset.windowDragging
     }
   }, [draggingWindowId, isWeatherWidgetDragging])
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
-
-    return () => {
-      window.clearInterval(intervalId)
-    }
-  }, [])
 
   useEffect(() => {
     try {
@@ -914,36 +940,6 @@ export function ShellLayout({
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [isBackgroundMenuOpen])
-
-  useEffect(() => {
-    if (!desktopBounds) {
-      return
-    }
-
-    setWeatherWidgetRect((current) => {
-      const nextRect = clampRectToBounds(
-        current ?? getWeatherWidgetDefaultRect(desktopBounds),
-        desktopBounds,
-        desktopWindowEdgeInset,
-      )
-
-      return rectEquals(current, nextRect) ? current : nextRect
-    })
-  }, [desktopBounds, weatherWidgetRect])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    try {
-      window.localStorage.removeItem('kris-lab.weather-widget-rect:v3')
-      window.localStorage.removeItem('kris-lab.weather-widget-rect:v2')
-      window.localStorage.removeItem('kris-lab.weather-widget-rect')
-    } catch {
-      // Ignore storage failures and keep the widget movable for the current session.
-    }
-  }, [])
 
   const clearEnteringFrames = (windowId: string) => {
     const frameIds = enteringFrameRef.current[windowId]
@@ -1035,11 +1031,21 @@ export function ShellLayout({
 
     if (dragSessionRef.current?.windowId === windowId) {
       dragSessionRef.current = null
+      draggedWindowRectRef.current = null
       setDraggingWindowId(null)
     }
 
-    setWindowOrder((current) => current.filter((candidate) => candidate !== windowId))
-    setActiveWindowId((current) => (current === windowId ? null : current))
+    delete windowFrameRefs.current[windowId]
+
+    setWindowOrder((current) => {
+      const next = current.filter((candidate) => candidate !== windowId)
+
+      setActiveWindowId((currentActiveWindowId) =>
+        currentActiveWindowId === windowId ? next.at(-1) ?? null : currentActiveWindowId,
+      )
+
+      return next
+    })
   }
 
   const startClosingWindow = (windowId: string) => {
@@ -1083,6 +1089,11 @@ export function ShellLayout({
 
       if (!shellRect || !systemBarRect || !dockRect) {
         return
+      }
+
+      shellBoundsRef.current = {
+        left: shellRect.left,
+        top: shellRect.top,
       }
 
       const top = Math.max(systemBarRect.bottom - shellRect.top, 0)
@@ -1228,20 +1239,7 @@ export function ShellLayout({
     }
 
     previousProjectWindowIdRef.current = projectWindowId
-    if (closingProjectSnapshot?.app.windowId === projectWindowId) {
-      clearClosingTimer(projectWindowId)
-      setClosingWindowIds((current) => removeWindowId(current, projectWindowId))
-      setClosingProjectSnapshot(null)
-    }
-    setWindowOrder((current) => {
-      const next = moveIdToEnd(current, projectWindowId)
-      return orderEquals(current, next) ? current : next
-    })
-    setActiveWindowId(projectWindowId)
-    if (hasMountedRef.current) {
-      startEnteringWindow(projectWindowId)
-    }
-  }, [closingProjectSnapshot, projectWindowId, reducedMotion])
+  }, [projectWindowId])
 
   useEffect(() => {
     const previousProjectWindowId = previousProjectWindowIdRef.current
@@ -1254,35 +1252,15 @@ export function ShellLayout({
 
     if (dragSessionRef.current?.windowId === previousProjectWindowId) {
       dragSessionRef.current = null
-      setDraggingWindowId(null)
+      const frameId = window.requestAnimationFrame(() => {
+        setDraggingWindowId(null)
+      })
+
+      return () => {
+        window.cancelAnimationFrame(frameId)
+      }
     }
   }, [closingProjectSnapshot, projectWindowId])
-
-  useEffect(() => {
-    const openWindowIds = [
-      ...(isLauncherOpen ? [launcherWindowId] : []),
-      ...(isAboutOpen ? [aboutWindowId] : []),
-      ...(projectWindowId ? [projectWindowId] : []),
-      ...(closingProjectWindowId ? [closingProjectWindowId] : []),
-    ]
-
-    setWindowOrder((current) => {
-      const next = [
-        ...current.filter((windowId) => openWindowIds.includes(windowId)),
-        ...openWindowIds.filter((windowId) => !current.includes(windowId)),
-      ]
-
-      return orderEquals(current, next) ? current : next
-    })
-
-    setActiveWindowId((current) => {
-      if (current && openWindowIds.includes(current)) {
-        return current
-      }
-
-      return openWindowIds.at(-1) ?? null
-    })
-  }, [closingProjectWindowId, isAboutOpen, isLauncherOpen, projectWindowId])
 
   useEffect(() => {
     if (dragEnabled || draggingWindowId === null) {
@@ -1317,18 +1295,8 @@ export function ShellLayout({
   useEffect(() => {
     if (!hasMountedRef.current) {
       hasMountedRef.current = true
-      previousActiveWindowIdRef.current = activeWindowId
-      return
     }
-
-    if (!activeWindowId || previousActiveWindowIdRef.current === activeWindowId) {
-      previousActiveWindowIdRef.current = activeWindowId
-      return
-    }
-
-    startForegroundingWindow(activeWindowId)
-    previousActiveWindowIdRef.current = activeWindowId
-  }, [activeWindowId, reducedMotion])
+  }, [])
 
   const buildShellRouteState = (
     nextView: ShellView,
@@ -1432,6 +1400,19 @@ export function ShellLayout({
   }
 
   const openProject = (project: PublicProjectEntry) => {
+    const nextProjectWindowId = createProjectWindowId(project.slug)
+
+    if (closingProjectSnapshot?.app.windowId === nextProjectWindowId) {
+      clearClosingTimer(nextProjectWindowId)
+      setClosingWindowIds((current) => removeWindowId(current, nextProjectWindowId))
+      setClosingProjectSnapshot(null)
+    }
+
+    if (hasMountedRef.current) {
+      startEnteringWindow(nextProjectWindowId)
+    }
+
+    activateWindow(nextProjectWindowId)
     navigate(getProjectPath(project.slug), {
       state: { fromLab: true, shellView: view, rootViewMode },
     })
@@ -1527,7 +1508,22 @@ export function ShellLayout({
     })
   }
 
+  const applyRectToElement = (node: HTMLDivElement | null, rect: WindowRect) => {
+    if (!node) {
+      return
+    }
+
+    node.style.left = `${rect.x}px`
+    node.style.top = `${rect.y}px`
+    node.style.width = `${rect.width}px`
+    node.style.height = `${rect.height}px`
+  }
+
   function activateWindow(windowId: string) {
+    if (resolvedActiveWindowId !== windowId) {
+      startForegroundingWindow(windowId)
+    }
+
     setWindowOrder((current) => {
       const next = moveIdToEnd(current, windowId)
       return orderEquals(current, next) ? current : next
@@ -1547,6 +1543,38 @@ export function ShellLayout({
     }
 
     setActiveWindowId(null)
+  }
+
+  const hideShellCursorHalo = () => {
+    shellRef.current?.style.setProperty('--shell-cursor-opacity', '0')
+  }
+
+  const handleDesktopPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (isAnyDesktopDragActive) {
+      hideShellCursorHalo()
+      return
+    }
+
+    const target = event.target instanceof HTMLElement ? event.target : null
+
+    if (
+      target?.closest('[data-desktop-window-id]') ||
+      target?.closest('[data-desktop-object-id]')
+    ) {
+      hideShellCursorHalo()
+      return
+    }
+
+    const shellNode = shellRef.current
+
+    if (!shellNode) {
+      return
+    }
+
+    const { left, top } = shellBoundsRef.current
+    shellNode.style.setProperty('--shell-cursor-x', `${event.clientX - left}px`)
+    shellNode.style.setProperty('--shell-cursor-y', `${event.clientY - top}px`)
+    shellNode.style.setProperty('--shell-cursor-opacity', '1')
   }
 
   const handleWindowFramePointerDownCapture = (windowId: string) => {
@@ -1625,11 +1653,12 @@ export function ShellLayout({
       desktopWindowEdgeInset,
     )
 
-    setWindowRect(windowId, nextRect)
+    draggedWindowRectRef.current = nextRect
+    applyRectToElement(windowFrameRefs.current[windowId] ?? null, nextRect)
   }
 
   const handleWeatherWidgetPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!dragEnabled || !desktopBounds || event.button !== 0 || !weatherWidgetRect) {
+    if (!dragEnabled || !desktopBounds || event.button !== 0 || !displayedWeatherWidgetRect) {
       return
     }
 
@@ -1649,7 +1678,7 @@ export function ShellLayout({
         x: event.clientX,
         y: event.clientY,
       },
-      startRect: weatherWidgetRect,
+      startRect: displayedWeatherWidgetRect,
     }
   }
 
@@ -1672,17 +1701,18 @@ export function ShellLayout({
       setIsWeatherWidgetDragging(true)
     }
 
-    setWeatherWidgetRectIfNeeded(
-      clampRectToBounds(
-        {
-          ...dragSession.startRect,
-          x: dragSession.startRect.x + deltaX,
-          y: dragSession.startRect.y + deltaY,
-        },
-        dragSession.bounds,
-        desktopWindowEdgeInset,
-      ),
+    const nextRect = clampRectToBounds(
+      {
+        ...dragSession.startRect,
+        x: dragSession.startRect.x + deltaX,
+        y: dragSession.startRect.y + deltaY,
+      },
+      dragSession.bounds,
+      desktopWindowEdgeInset,
     )
+
+    draggedWeatherWidgetRectRef.current = nextRect
+    applyRectToElement(weatherWidgetFrameRef.current, nextRect)
   }
 
   const finishWindowTitlebarDrag = (
@@ -1703,7 +1733,12 @@ export function ShellLayout({
       event.currentTarget.releasePointerCapture(event.pointerId)
     }
 
+    if (dragSession.hasCrossedThreshold && draggedWindowRectRef.current) {
+      setWindowRect(windowId, draggedWindowRectRef.current)
+    }
+
     dragSessionRef.current = null
+    draggedWindowRectRef.current = null
     setDraggingWindowId((current) => (current === windowId ? null : current))
   }
 
@@ -1718,18 +1753,15 @@ export function ShellLayout({
       event.currentTarget.releasePointerCapture(event.pointerId)
     }
 
+    if (dragSession.hasCrossedThreshold && draggedWeatherWidgetRectRef.current) {
+      setWeatherWidgetRectIfNeeded(draggedWeatherWidgetRectRef.current)
+    }
+
     weatherWidgetDragSessionRef.current = null
+    draggedWeatherWidgetRectRef.current = null
     setIsWeatherWidgetDragging(false)
   }
 
-  const currentMenuBarDateTimeLabel = new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  }).format(currentTime)
   const rootEntries: RootEntry[] = [
     {
       id: 'projects',
@@ -1758,6 +1790,13 @@ export function ShellLayout({
       ? windowRects[projectWindowId] ??
         getProjectDefaultRect(desktopBounds, launcherRect)
       : null
+  const displayedWeatherWidgetRect = desktopBounds
+    ? clampRectToBounds(
+        weatherWidgetRect ?? getWeatherWidgetDefaultRect(desktopBounds),
+        desktopBounds,
+        desktopWindowEdgeInset,
+      )
+    : null
   const desktopWindows: ShellWindowRecord[] = []
 
   if (isLauncherOpen && launcherRect) {
@@ -1816,6 +1855,12 @@ export function ShellLayout({
       .map((desktopWindow) => desktopWindow.id)
       .filter((windowId) => !windowOrder.includes(windowId)),
   ]
+  const resolvedActiveWindowId =
+    activeWindowId === null
+      ? null
+      : orderedWindowIds.includes(activeWindowId)
+        ? activeWindowId
+        : orderedWindowIds.at(-1) ?? null
   const isAnyDesktopDragActive = draggingWindowId !== null || isWeatherWidgetDragging
   const desktopStyle = desktopMetrics
     ? {
@@ -2089,13 +2134,12 @@ export function ShellLayout({
                 <section className="shell-view shell-view--icons">
                   {rootViewMode === 'grid' ? (
                     <div className="shell-icon-grid" role="list" aria-label="Root folders">
-                      {rootEntries.map((entry, index) => (
+                      {rootEntries.map((entry) => (
                         <motion.button
                           key={entry.id}
                           type="button"
                           className="shell-icon-item"
                           role="listitem"
-                          {...getListReveal(reducedMotion, index)}
                           onClick={() => openRootEntry(entry.id)}
                           onKeyDown={(event) => {
                             if (event.key === 'Enter' || event.key === ' ') {
@@ -2115,11 +2159,10 @@ export function ShellLayout({
                   ) : (
                     <div className="shell-root-list-view">
                       <ul className="shell-list shell-list--root" role="list">
-                        {rootEntries.map((entry, index) => (
+                        {rootEntries.map((entry) => (
                           <motion.li
                             key={entry.id}
                             className="shell-list__item"
-                            {...getListReveal(reducedMotion, index)}
                           >
                             <button
                               type="button"
@@ -2167,13 +2210,12 @@ export function ShellLayout({
                   {view === 'root' ? (
                     rootViewMode === 'grid' ? (
                       <div className="shell-icon-grid" role="list" aria-label="Root folders">
-                        {rootEntries.map((entry, index) => (
+                        {rootEntries.map((entry) => (
                           <motion.button
                             key={entry.id}
                             type="button"
                             className="shell-icon-item"
                             role="listitem"
-                            {...getListReveal(reducedMotion, index)}
                             onClick={() => openRootEntry(entry.id)}
                             onKeyDown={(event) => {
                               if (event.key === 'Enter' || event.key === ' ') {
@@ -2193,11 +2235,10 @@ export function ShellLayout({
                     ) : (
                       <div className="shell-root-list-view">
                         <ul className="shell-list shell-list--root" role="list">
-                          {rootEntries.map((entry, index) => (
+                          {rootEntries.map((entry) => (
                             <motion.li
                               key={entry.id}
                               className="shell-list__item"
-                              {...getListReveal(reducedMotion, index)}
                             >
                               <button
                                 type="button"
@@ -2288,27 +2329,6 @@ export function ShellLayout({
       data-shell-background-kind={selectedBackground.kind}
       data-shell-background-id={selectedBackground.id}
       data-window-dragging={isAnyDesktopDragActive ? 'true' : undefined}
-      onPointerMove={(event) => {
-        const target = event.target instanceof HTMLElement ? event.target : null
-        const isDesktopBackground =
-          !isAnyDesktopDragActive &&
-          !!target?.closest('.shell-route__desktop') &&
-          !target.closest('[data-desktop-window-id]') &&
-          !target.closest('[data-desktop-object-id]')
-
-        if (!isDesktopBackground) {
-          event.currentTarget.style.setProperty('--shell-cursor-opacity', '0')
-          return
-        }
-
-        const rect = event.currentTarget.getBoundingClientRect()
-        event.currentTarget.style.setProperty('--shell-cursor-x', `${event.clientX - rect.left}px`)
-        event.currentTarget.style.setProperty('--shell-cursor-y', `${event.clientY - rect.top}px`)
-        event.currentTarget.style.setProperty('--shell-cursor-opacity', '1')
-      }}
-      onPointerLeave={(event) => {
-        event.currentTarget.style.setProperty('--shell-cursor-opacity', '0')
-      }}
       {...windowReveal}
     >
       {selectedBackground.kind === 'static' ? (
@@ -2458,12 +2478,7 @@ export function ShellLayout({
                 <span className="shell-system-bar__icon-placeholder" />
               </button>
             ))}
-            <span
-              className="shell-system-bar__time"
-              aria-label={`Local date and time ${currentMenuBarDateTimeLabel}`}
-            >
-              {currentMenuBarDateTimeLabel}
-            </span>
+            <MenuBarClock />
           </div>
         </div>
       </header>
@@ -2474,9 +2489,14 @@ export function ShellLayout({
         className="shell-route__desktop"
         style={desktopStyle}
         onPointerDown={handleDesktopPointerDown}
+        onPointerLeave={hideShellCursorHalo}
+        onPointerMove={handleDesktopPointerMove}
       >
-        {weatherWidgetRect ? (
+        {displayedWeatherWidgetRect ? (
           <div
+            ref={(node) => {
+              weatherWidgetFrameRef.current = node
+            }}
             className={[
               'shell-desktop__object',
               'shell-desktop__object--weather',
@@ -2484,10 +2504,14 @@ export function ShellLayout({
             ].filter(Boolean).join(' ')}
             data-desktop-object-id={weatherWidgetDesktopObjectId}
             style={{
-              left: `${weatherWidgetRect.x}px`,
-              top: `${weatherWidgetRect.y}px`,
-              width: `${weatherWidgetRect.width}px`,
-              height: `${weatherWidgetRect.height}px`,
+              ...(isWeatherWidgetDragging
+                ? {}
+                : {
+                    left: `${displayedWeatherWidgetRect.x}px`,
+                    top: `${displayedWeatherWidgetRect.y}px`,
+                    width: `${displayedWeatherWidgetRect.width}px`,
+                    height: `${displayedWeatherWidgetRect.height}px`,
+                  }),
               zIndex: 0,
             }}
             onPointerCancel={finishWeatherWidgetDrag}
@@ -2506,12 +2530,20 @@ export function ShellLayout({
             return null
           }
 
-          const isActive = activeWindowId === windowId
+          const isActive = resolvedActiveWindowId === windowId
           const isDragging = draggingWindowId === windowId
 
           return (
             <div
               key={desktopWindow.id}
+              ref={(node) => {
+                if (node) {
+                  windowFrameRefs.current[desktopWindow.id] = node
+                  return
+                }
+
+                delete windowFrameRefs.current[desktopWindow.id]
+              }}
               className={[
                 'shell-desktop__window-frame',
                 `shell-desktop__window-frame--${desktopWindow.kind}`,
@@ -2524,10 +2556,14 @@ export function ShellLayout({
               data-shell-app-id={desktopWindow.appId}
               data-desktop-window-id={desktopWindow.id}
               style={{
-                left: `${desktopWindow.rect.x}px`,
-                top: `${desktopWindow.rect.y}px`,
-                width: `${desktopWindow.rect.width}px`,
-                height: `${desktopWindow.rect.height}px`,
+                ...(isDragging
+                  ? {}
+                  : {
+                      left: `${desktopWindow.rect.x}px`,
+                      top: `${desktopWindow.rect.y}px`,
+                      width: `${desktopWindow.rect.width}px`,
+                      height: `${desktopWindow.rect.height}px`,
+                    }),
                 zIndex: index + 1,
               }}
               onPointerDownCapture={() => handleWindowFramePointerDownCapture(desktopWindow.id)}

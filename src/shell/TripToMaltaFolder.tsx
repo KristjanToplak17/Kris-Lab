@@ -146,8 +146,11 @@ export function TripToMaltaFolder({
 }: TripToMaltaFolderProps) {
   const reducedMotion = usePrefersReducedMotion()
   const containerRef = useRef<HTMLDivElement>(null)
+  const flapRef = useRef<HTMLDivElement>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  const [useFlapBlurFallback, setUseFlapBlurFallback] = useState(false)
+  const shouldUseFlapBlurFallback = !reducedMotion && useFlapBlurFallback
 
   useEffect(() => {
     if (!isOpen) {
@@ -174,6 +177,35 @@ export function TripToMaltaFolder({
       document.removeEventListener('keydown', handleEscape)
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (reducedMotion) {
+      return undefined
+    }
+
+    let frameOne = 0
+    let frameTwo = 0
+
+    const checkBackdropFilter = () => {
+      const flap = flapRef.current
+
+      if (!flap) {
+        return
+      }
+
+      const computedBackdropFilter = getComputedStyle(flap).backdropFilter
+      setUseFlapBlurFallback(!computedBackdropFilter || computedBackdropFilter === 'none')
+    }
+
+    frameOne = window.requestAnimationFrame(() => {
+      frameTwo = window.requestAnimationFrame(checkBackdropFilter)
+    })
+
+    return () => {
+      window.cancelAnimationFrame(frameOne)
+      window.cancelAnimationFrame(frameTwo)
+    }
+  }, [reducedMotion])
 
   const animationState = isOpen ? 'open' : isHovered && !reducedMotion ? 'hover' : 'closed'
 
@@ -290,7 +322,38 @@ export function TripToMaltaFolder({
             animate={reducedMotion ? undefined : animationState}
             style={reducedMotion ? undefined : { transformStyle: 'preserve-3d', transformOrigin: 'bottom' }}
           >
-            <div className="projects-folder__flap" aria-hidden="true">
+            <div
+              ref={flapRef}
+              className="projects-folder__flap"
+              aria-hidden="true"
+              style={
+                reducedMotion
+                  ? undefined
+                  : {
+                      backdropFilter: 'blur(4px)',
+                      WebkitBackdropFilter: 'blur(4px)',
+                    }
+              }
+            >
+              {shouldUseFlapBlurFallback ? (
+                <div className="projects-folder__flap-fallback" aria-hidden="true">
+                  <div className="projects-folder__flap-fallback-stack">
+                    <motion.div
+                      className="projects-folder__flap-fallback-card"
+                      variants={reducedMotion ? undefined : cardVariants[2]}
+                      initial={false}
+                      animate={reducedMotion ? undefined : animationState}
+                      style={reducedMotion ? getReducedCardStyle(2, isOpen) : undefined}
+                    >
+                      <img
+                        className="projects-folder__flap-fallback-image"
+                        src={tripToMaltaImages[2].src}
+                        alt=""
+                      />
+                    </motion.div>
+                  </div>
+                </div>
+              ) : null}
               <div className="projects-folder__flap-sheen" />
               <div className="projects-folder__flap-grain" />
             </div>

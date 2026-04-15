@@ -1,5 +1,4 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { getListReveal } from '../lib/motion'
 import { shellEase } from '../lib/motion'
 import { usePrefersReducedMotion } from '../lib/reduced-motion'
 import type { PublicProjectEntry } from '../pieces/types'
@@ -45,11 +44,10 @@ export function AppList({ pieces, onOpenProject }: AppListProps) {
 
     return (
       <ul className="shell-list shell-list--documents" role="list">
-        {pieces.map((piece, index) => (
+        {pieces.map((piece) => (
           <motion.li
             key={piece.slug}
             className="shell-list__item"
-            {...getListReveal(reducedMotion, index)}
           >
             <button
               type="button"
@@ -98,11 +96,10 @@ export function AppList({ pieces, onOpenProject }: AppListProps) {
           </div>
         ) : (
           <ul className="shell-list shell-list--documents" role="list">
-            {pieces.map((piece, index) => (
+            {pieces.map((piece) => (
               <motion.li
                 key={piece.slug}
                 className="shell-list__item"
-                {...getListReveal(reducedMotion, index)}
               >
                 <button
                   type="button"

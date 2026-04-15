@@ -45,6 +45,8 @@ interface WeatherHourlyPoint {
   temperature: number
 }
 
+type WeatherLoadState = 'loading' | 'ready' | 'error'
+
 type WeatherGlyphKind =
   | 'clear'
   | 'cloud'
@@ -271,6 +273,30 @@ function formatRoundedTemperature(temperature: number | null) {
   return Math.round(temperature).toString()
 }
 
+function getGeolocationErrorMessage(error: unknown) {
+  const errorCode =
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    typeof error.code === 'number'
+      ? error.code
+      : null
+
+  if (errorCode === 1) {
+    return 'Location access denied'
+  }
+
+  if (errorCode === 2) {
+    return 'Location unavailable'
+  }
+
+  if (errorCode === 3) {
+    return 'Location request timed out'
+  }
+
+  return 'Unable to refresh location'
+}
+
 function RefreshIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" {...props}>
@@ -437,36 +463,12 @@ function WeatherGlyph({
 
 export function WeatherWidget({ className }: WeatherWidgetProps) {
   const [snapshot, setSnapshot] = useState<WeatherSnapshot | null>(null)
-  const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(false)
+  const [loadState, setLoadState] = useState<WeatherLoadState>('loading')
   const [isRefreshingLocation, setIsRefreshingLocation] = useState(false)
   const [refreshStatusMessage, setRefreshStatusMessage] = useState<string | null>(null)
-  const [hasLoaded, setHasLoaded] = useState(false)
   const requestCounterRef = useRef(0)
   const activeAbortControllerRef = useRef<AbortController | null>(null)
-
-  const getGeolocationErrorMessage = (error: unknown) => {
-    const errorCode =
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      typeof error.code === 'number'
-        ? error.code
-        : null
-
-    if (errorCode === 1) {
-      return 'Location access denied'
-    }
-
-    if (errorCode === 2) {
-      return 'Location unavailable'
-    }
-
-    if (errorCode === 3) {
-      return 'Location request timed out'
-    }
-
-    return 'Unable to refresh location'
-  }
+  const snapshotRef = useRef<WeatherSnapshot | null>(null)
 
   useEffect(() => {
     return () => {
@@ -481,7 +483,6 @@ export function WeatherWidget({ className }: WeatherWidgetProps) {
       activeAbortControllerRef.current?.abort()
       const abortController = new AbortController()
       activeAbortControllerRef.current = abortController
-      setIsLoadingSnapshot(true)
 
       try {
         const forecast = await fetchWeatherForecast(location, abortController.signal)
@@ -503,12 +504,20 @@ export function WeatherWidget({ className }: WeatherWidgetProps) {
           return
         }
 
-        setSnapshot(buildWeatherSnapshot(resolvedLabel, forecast))
-        setHasLoaded(true)
-      } finally {
-        if (requestCounterRef.current === requestId) {
-          setIsLoadingSnapshot(false)
+        const nextSnapshot = buildWeatherSnapshot(resolvedLabel, forecast)
+        snapshotRef.current = nextSnapshot
+        setSnapshot(nextSnapshot)
+        setLoadState('ready')
+      } catch (error) {
+        if (
+          requestCounterRef.current === requestId &&
+          !abortController.signal.aborted &&
+          snapshotRef.current === null
+        ) {
+          setLoadState('error')
         }
+
+        throw error
       }
     },
     [],
@@ -516,16 +525,13 @@ export function WeatherWidget({ className }: WeatherWidgetProps) {
 
   useEffect(() => {
     setRefreshStatusMessage(null)
+    setLoadState('loading')
     void commitSnapshot(mariborWeatherLocation, false).catch((error: unknown) => {
       if (
         error instanceof Error &&
         error.name === 'AbortError'
       ) {
         return
-      }
-
-      if (requestCounterRef.current > 0) {
-        setHasLoaded(true)
       }
     })
   }, [commitSnapshot])
@@ -577,7 +583,8 @@ export function WeatherWidget({ className }: WeatherWidgetProps) {
 
   const displayLocationLabel = snapshot?.locationLabel ?? mariborWeatherLocation.label
   const displayTemperature = snapshot?.currentTemperature ?? null
-  const displayConditionLabel = snapshot?.conditionLabel ?? (hasLoaded ? 'Unavailable' : 'Loading weather')
+  const displayConditionLabel =
+    snapshot?.conditionLabel ?? (loadState === 'error' ? 'Unavailable' : 'Loading weather')
   const displayHighTemperature = snapshot?.highTemperature ?? null
   const displayLowTemperature = snapshot?.lowTemperature ?? null
   const displayHourly = snapshot?.hourly ?? []
@@ -636,7 +643,7 @@ export function WeatherWidget({ className }: WeatherWidgetProps) {
                 </ol>
               ) : (
                 <span className="weather-widget__hourly-placeholder">
-                  {hasLoaded ? 'Forecast unavailable' : 'Loading forecast'}
+                  {loadState === 'error' ? 'Forecast unavailable' : 'Loading forecast'}
                 </span>
               )}
             </div>
@@ -661,7 +668,7 @@ export function WeatherWidget({ className }: WeatherWidgetProps) {
             >
               <RefreshIcon
                 className={
-                  isRefreshingLocation || (isLoadingSnapshot && !hasLoaded)
+                  isRefreshingLocation || (loadState === 'loading' && snapshot === null)
                     ? 'weather-widget__refresh-icon is-spinning'
                     : 'weather-widget__refresh-icon'
                 }
