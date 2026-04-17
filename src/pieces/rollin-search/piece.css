@@ -1,0 +1,281 @@
+@property --rollin-progress {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+.rollin-search-piece {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0) 35%),
+    linear-gradient(180deg, #f8f7f4 0%, #f2f1ec 100%);
+}
+
+.rollin-search-piece__center {
+  width: 100%;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.rollin-search-control {
+  --rollin-progress: 0;
+  --rollin-track-width: calc(
+    var(--rollin-closed-ball-size) +
+    (var(--rollin-open-width) - var(--rollin-closed-ball-size)) * var(--rollin-progress)
+  );
+  --rollin-ball-left: calc(
+    var(--rollin-closed-ball-left) +
+    var(--rollin-ball-travel) * var(--rollin-progress)
+  );
+  --rollin-track-right: calc(
+    var(--rollin-open-width) -
+    (var(--rollin-ball-left) + var(--rollin-closed-ball-size))
+  );
+  --rollin-label-opacity: clamp(
+    0,
+    (var(--rollin-progress) - var(--rollin-label-readable-at)) * 4,
+    1
+  );
+  --rollin-face-shift: calc(var(--rollin-face-cycle) * (1 - var(--rollin-progress)));
+  position: relative;
+  width: var(--rollin-open-width);
+  height: var(--rollin-open-height);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  transition: --rollin-progress var(--rollin-close-duration) var(--rollin-ease);
+}
+
+.rollin-search-control[data-state='open'] {
+  --rollin-progress: 1;
+  transition-duration: var(--rollin-open-duration);
+}
+
+.rollin-search-control:focus-visible {
+  outline: none;
+}
+
+.rollin-search-control__track,
+.rollin-search-control__shadow,
+.rollin-search-control__ball {
+  position: absolute;
+}
+
+.rollin-search-control__track {
+  right: var(--rollin-track-right);
+  top: 0;
+  width: var(--rollin-track-width);
+  height: var(--rollin-open-height);
+  overflow: hidden;
+  border-radius: var(--rollin-track-radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0)),
+    rgb(238, 238, 238);
+}
+
+.rollin-search-control__content {
+  position: absolute;
+  left: var(--rollin-accent-inset-left);
+  top: var(--rollin-content-inset-top);
+  width: min(
+    var(--rollin-content-max-width),
+    max(
+      0px,
+      calc(
+        var(--rollin-track-width) -
+        var(--rollin-closed-ball-size) -
+        var(--rollin-accent-inset-left) -
+        14px
+      )
+    )
+  );
+  height: var(--rollin-content-height);
+  overflow: hidden;
+}
+
+.rollin-search-control__indicator {
+  position: absolute;
+  left: 0;
+  top: var(--rollin-accent-inset-top);
+  width: var(--rollin-accent-width);
+  height: var(--rollin-accent-height);
+  background: rgb(255, 97, 26);
+  opacity: 0;
+  transition: opacity var(--rollin-indicator-fade-out-duration) linear;
+}
+
+.rollin-search-control[data-state='open'] .rollin-search-control__indicator {
+  opacity: 0.9;
+  transition-delay: calc(var(--rollin-open-duration) * var(--rollin-settle-delay-ratio));
+  animation: rollin-search-indicator-blink var(--rollin-indicator-blink-duration) ease-in-out infinite;
+  animation-delay: calc(var(--rollin-open-duration) * var(--rollin-settle-delay-ratio));
+}
+
+.rollin-search-control__label {
+  position: absolute;
+  left: var(--rollin-label-inset-left);
+  top: 50%;
+  font-family: var(--shell-font-ui);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+  color: rgb(168, 168, 168);
+  white-space: nowrap;
+  opacity: var(--rollin-label-opacity);
+  transform: translateY(-42%);
+}
+
+.rollin-search-control__shadow--large {
+  left: calc(var(--rollin-ball-left) + var(--rollin-large-shadow-offset-x));
+  top: var(--rollin-large-shadow-offset-y);
+  width: var(--rollin-large-shadow-size);
+  height: var(--rollin-large-shadow-size);
+  border-radius: 56px;
+  box-shadow:
+    rgba(0, 0, 0, 0.247) 0.839802px 0.839802px 1.18766px -0.625px,
+    rgba(0, 0, 0, 0.24) 1.99048px 1.99048px 2.81496px -1.25px,
+    rgba(0, 0, 0, 0.23) 3.63084px 3.63084px 5.13478px -1.875px,
+    rgba(0, 0, 0, 0.22) 6.03627px 6.03627px 8.53657px -2.5px,
+    rgba(0, 0, 0, 0.2) 9.74808px 9.74808px 13.7859px -3.125px,
+    rgba(0, 0, 0, 0.17) 15.9566px 15.9566px 22.5661px -3.75px,
+    rgba(0, 0, 0, 0.114) 27.4762px 27.4762px 38.8573px -4.375px,
+    rgba(0, 0, 0, 0) 50px 50px 70.7107px -5px;
+}
+
+.rollin-search-control__shadow--small {
+  left: calc(var(--rollin-ball-left) + var(--rollin-small-shadow-offset-x));
+  top: var(--rollin-small-shadow-offset-y);
+  width: var(--rollin-small-shadow-width);
+  height: var(--rollin-small-shadow-height);
+  border-radius: 56px;
+  box-shadow:
+    rgba(0, 0, 0, 0.208) 1.51164px 0.201553px 0.610009px -0.53125px,
+    rgba(0, 0, 0, 0.204) 3.58286px 0.477715px 1.44583px -1.0625px,
+    rgba(0, 0, 0, 0.2) 6.53551px 0.871402px 2.63734px -1.59375px,
+    rgba(0, 0, 0, 0.192) 10.8653px 1.4487px 4.38457px -2.125px,
+    rgba(0, 0, 0, 0.176) 17.5465px 2.33954px 7.08073px -2.65625px,
+    rgba(0, 0, 0, 0.157) 28.7219px 3.82959px 11.5904px -3.1875px,
+    rgba(0, 0, 0, 0.118) 49.4572px 6.5943px 19.958px -3.71875px,
+    rgba(0, 0, 0, 0.04) 90px 12px 36.3186px -4.25px,
+    rgba(0, 0, 0, 0.25) 10px 10px 24px 0;
+}
+
+.rollin-search-control__ball {
+  left: var(--rollin-ball-left);
+  top: var(--rollin-ball-dock-inset);
+  z-index: 2;
+  width: var(--rollin-closed-ball-size);
+  height: var(--rollin-closed-ball-size);
+  overflow: hidden;
+  border-radius: 56px;
+  color: #fcfcfa;
+  background:
+    radial-gradient(circle at 29.1% 29.7%, rgb(255, 150, 102) 0%, rgb(255, 97, 26) 66%, rgb(234, 71, 22) 100%);
+  box-shadow:
+    rgba(232, 61, 23, 0.35) 0 0 0 -0.75px inset,
+    rgba(232, 61, 23, 0.7) 0 0 0 -1.5px inset,
+    rgba(0, 0, 0, 0.25) -2px -1px 4px 0 inset,
+    rgba(204, 44, 16, 0.455) -0.662406px -0.0602187px 0.53211px -0.75px inset,
+    rgba(204, 44, 16, 0.475) -2.51739px -0.228853px 2.02221px -1.5px inset,
+    rgba(204, 44, 16, 0.55) -11px -1px 8.83629px -2.25px inset;
+}
+
+.rollin-search-control__ball::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 48%),
+    radial-gradient(circle at 70% 78%, rgba(177, 37, 9, 0.16), rgba(177, 37, 9, 0) 44%);
+  pointer-events: none;
+}
+
+.rollin-search-control__face-window {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.rollin-search-control__face-strip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  width: calc(var(--rollin-face-cycle) * 2);
+  height: var(--rollin-closed-ball-size);
+  transform: translateX(calc(var(--rollin-face-shift) * -1));
+}
+
+.rollin-search-control__face {
+  position: relative;
+  width: var(--rollin-face-cycle);
+  height: var(--rollin-closed-ball-size);
+  flex: 0 0 var(--rollin-face-cycle);
+}
+
+.rollin-search-control__face svg {
+  position: absolute;
+  left: var(--rollin-face-center-offset-x);
+  top: var(--rollin-face-center-offset-y);
+  width: var(--rollin-face-size);
+  height: var(--rollin-face-size);
+}
+
+.rollin-search-control__highlight {
+  position: absolute;
+  left: var(--rollin-highlight-offset-x);
+  top: var(--rollin-highlight-offset-y);
+  width: var(--rollin-highlight-size);
+  height: var(--rollin-highlight-size);
+  border-radius: 56px;
+  background: rgb(247, 246, 245);
+  opacity: 0.38;
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.rollin-search-control:focus-visible .rollin-search-control__track {
+  box-shadow: 0 0 0 3px rgba(116, 150, 212, 0.18);
+}
+
+.rollin-search-control[data-reduced-motion='true'] {
+  transition-duration: var(--rollin-close-duration);
+  transition-timing-function: linear;
+}
+
+.rollin-search-control[data-state='open'][data-reduced-motion='true'] {
+  transition-duration: var(--rollin-open-duration);
+}
+
+.rollin-search-control[data-reduced-motion='true'] .rollin-search-control__indicator {
+  animation: none;
+}
+
+@keyframes rollin-search-indicator-blink {
+  0%,
+  38%,
+  100% {
+    opacity: 1;
+  }
+
+  48%,
+  56% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 540px) {
+  .rollin-search-piece {
+    padding: 1.5rem;
+  }
+}

@@ -7,6 +7,7 @@ import type {
   PublicProjectEntry,
 } from './types'
 import { meta as example1Meta } from './example1/meta'
+import { meta as rollinSearchMeta } from './rollin-search/meta'
 import { meta as tripToMaltaMeta } from './trip-to-malta/meta'
 
 const blockedPublicSlugSegments = ['placeholder', 'tbd', 'template', 'todo', 'wip'] as const
@@ -31,6 +32,7 @@ function definePiece(manifest: PieceManifest, importer: PieceImporter): PieceMet
 
 export const pieceRegistry: PieceMeta[] = [
   definePiece(tripToMaltaMeta, () => import('./trip-to-malta/Piece')),
+  definePiece(rollinSearchMeta, () => import('./rollin-search/Piece')),
   definePiece(example1Meta, () => import('./example1/Piece')),
 ].sort((left, right) => left.order - right.order)
 
