@@ -10,6 +10,7 @@ import {
   type FocusEvent as ReactFocusEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
+  type RefObject,
   type ReactNode,
   type SVGProps,
 } from 'react'
@@ -94,6 +95,19 @@ interface DockIconButtonProps {
   onTooltipPointerEnter?: () => void
   onTooltipPointerLeave?: (event: ReactPointerEvent<HTMLButtonElement>) => void
   children?: ReactNode
+}
+
+interface BackgroundMenuButtonProps {
+  reducedMotion: boolean
+  selectedBackground: ShellBackgroundDefinition
+  onSelectBackground: (backgroundId: ShellBackgroundId) => void
+}
+
+interface ShellDockProps {
+  dockRef: RefObject<HTMLElement | null>
+  reducedMotion: boolean
+  isLauncherOpen: boolean
+  onActivateLauncher: () => void
 }
 
 interface RootEntry {
@@ -521,22 +535,24 @@ function DockIconButton({
   children,
 }: DockIconButtonProps) {
   const [isPressing, setIsPressing] = useState(false)
-  const iconFrameRef = useRef<HTMLSpanElement>(null)
+  const [isBouncing, setIsBouncing] = useState(false)
+  const bounceFrameRef = useRef<number | null>(null)
 
   const resetPressState = () => {
     setIsPressing(false)
   }
 
   const restartBounce = () => {
-    const iconFrame = iconFrameRef.current
-
-    if (!iconFrame) {
-      return
+    if (bounceFrameRef.current !== null) {
+      window.cancelAnimationFrame(bounceFrameRef.current)
+      bounceFrameRef.current = null
     }
 
-    iconFrame.classList.remove('is-bouncing')
-    void iconFrame.offsetWidth
-    iconFrame.classList.add('is-bouncing')
+    setIsBouncing(false)
+    bounceFrameRef.current = window.requestAnimationFrame(() => {
+      setIsBouncing(true)
+      bounceFrameRef.current = null
+    })
   }
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
@@ -556,13 +572,22 @@ function DockIconButton({
   }
 
   const handleClick = () => {
+    setIsPressing(false)
+    onActivate?.()
+
     if (!disabled && !reducedMotion) {
       restartBounce()
     }
-
-    setIsPressing(false)
-    onActivate?.()
   }
+
+  useEffect(() => {
+    return () => {
+      if (bounceFrameRef.current !== null) {
+        window.cancelAnimationFrame(bounceFrameRef.current)
+        bounceFrameRef.current = null
+      }
+    }
+  }, [])
 
   return (
     <button
@@ -595,11 +620,13 @@ function DockIconButton({
     >
       <span className="shell-dock__motion-shell" aria-hidden="true">
         <span
-          ref={iconFrameRef}
-          className="shell-dock__icon-frame"
+          className={[
+            'shell-dock__icon-frame',
+            isBouncing ? 'is-bouncing' : '',
+          ].filter(Boolean).join(' ')}
           onAnimationEnd={(event) => {
             if (event.animationName === 'shell-dock-bounce') {
-              event.currentTarget.classList.remove('is-bouncing')
+              setIsBouncing(false)
             }
           }}
         >
@@ -613,6 +640,230 @@ function DockIconButton({
         </span>
       ) : null}
     </button>
+  )
+}
+
+function BackgroundMenuButton({
+  reducedMotion,
+  selectedBackground,
+  onSelectBackground,
+}: BackgroundMenuButtonProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const menuId = useId()
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target instanceof Node ? event.target : null
+
+      if (target && menuRef.current?.contains(target)) {
+        return
+      }
+
+      setIsOpen(false)
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false)
+      }
+    }
+
+    window.addEventListener('pointerdown', handlePointerDown)
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen])
+
+  return (
+    <div
+      ref={menuRef}
+      className={[
+        'shell-system-bar__menu-group',
+        'shell-system-bar__menu-item--background',
+        isOpen ? 'is-open' : '',
+      ].filter(Boolean).join(' ')}
+    >
+      <button
+        type="button"
+        className={[
+          'shell-system-bar__button',
+          'shell-system-bar__button--interactive',
+          'shell-system-bar__menu-item',
+          'shell-system-bar__menu-trigger',
+        ].join(' ')}
+        aria-expanded={isOpen}
+        aria-controls={menuId}
+        aria-haspopup="menu"
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        <span>Background</span>
+        <ChevronDownIcon className="shell-system-bar__menu-caret" />
+      </button>
+
+      <AnimatePresence>
+        {isOpen ? (
+          <motion.div
+            id={menuId}
+            className="shell-background-menu"
+            role="menu"
+            aria-label="Desktop backgrounds"
+            initial={reducedMotion ? false : { opacity: 0, y: -2 }}
+            animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+            exit={reducedMotion ? undefined : { opacity: 0, y: -1 }}
+            transition={
+              reducedMotion
+                ? undefined
+                : { duration: 0.13, ease: shellEase }
+            }
+          >
+            <div className="shell-background-menu__list" role="none">
+              {shellBackgroundOptions.map((option) => {
+                const isSelected = option.id === selectedBackground.id
+
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={isSelected}
+                    className={[
+                      'shell-background-menu__option',
+                      isSelected ? 'is-selected' : '',
+                    ].filter(Boolean).join(' ')}
+                    onClick={() => {
+                      onSelectBackground(option.id)
+                      setIsOpen(false)
+                    }}
+                  >
+                    <span
+                      className={[
+                        'shell-background-menu__preview',
+                        option.kind === 'animated'
+                          ? 'shell-background-menu__preview--animated'
+                          : '',
+                      ].filter(Boolean).join(' ')}
+                      aria-hidden="true"
+                    >
+                      {option.previewSrc ? (
+                        <img src={option.previewSrc} alt="" decoding="async" />
+                      ) : (
+                        <span className="shell-background-menu__preview-animated-dot" />
+                      )}
+                    </span>
+                    <span className="shell-background-menu__label">{option.label}</span>
+                    <span className="shell-background-menu__check" aria-hidden="true">
+                      {isSelected ? <CheckIcon /> : null}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+function ShellDock({
+  dockRef,
+  reducedMotion,
+  isLauncherOpen,
+  onActivateLauncher,
+}: ShellDockProps) {
+  const [hoveredDockItemId, setHoveredDockItemId] = useState<string | null>(null)
+  const dockTooltipTimerRef = useRef<number | null>(null)
+  const dockTooltipPrimedRef = useRef(false)
+
+  const clearDockTooltipTimer = () => {
+    if (dockTooltipTimerRef.current !== null) {
+      window.clearTimeout(dockTooltipTimerRef.current)
+      dockTooltipTimerRef.current = null
+    }
+  }
+
+  const showDockTooltip = (itemId: string, delayed: boolean) => {
+    clearDockTooltipTimer()
+
+    if (reducedMotion || dockTooltipPrimedRef.current || !delayed) {
+      setHoveredDockItemId(itemId)
+      dockTooltipPrimedRef.current = true
+      return
+    }
+
+    dockTooltipTimerRef.current = window.setTimeout(() => {
+      setHoveredDockItemId(itemId)
+      dockTooltipPrimedRef.current = true
+      dockTooltipTimerRef.current = null
+    }, 96)
+  }
+
+  const hideDockTooltip = (resetPrimed = false) => {
+    clearDockTooltipTimer()
+    setHoveredDockItemId(null)
+
+    if (resetPrimed) {
+      dockTooltipPrimedRef.current = false
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (dockTooltipTimerRef.current !== null) {
+        window.clearTimeout(dockTooltipTimerRef.current)
+        dockTooltipTimerRef.current = null
+      }
+    }
+  }, [])
+
+  return (
+    <nav ref={dockRef} className="shell-dock" aria-label="Dock">
+      <div className="shell-dock__inner" onPointerLeave={() => hideDockTooltip(true)}>
+        {dockItems.map((item) => {
+          return (
+            <DockIconButton
+              key={item.id}
+              label={item.label}
+              kind={item.kind}
+              isActive={isLauncherOpen}
+              reducedMotion={reducedMotion}
+              onActivate={onActivateLauncher}
+              showTooltip={hoveredDockItemId === item.id}
+              onTooltipPointerEnter={() => showDockTooltip(item.id, true)}
+              onTooltipPointerLeave={(event) => {
+                const next = event.relatedTarget instanceof HTMLElement ? event.relatedTarget : null
+
+                if (next?.closest('.shell-dock__button')) {
+                  return
+                }
+
+                hideDockTooltip()
+              }}
+              onTooltipFocus={() => showDockTooltip(item.id, false)}
+              onTooltipBlur={(event) => {
+                const next = event.relatedTarget instanceof HTMLElement ? event.relatedTarget : null
+
+                if (next?.closest('.shell-dock__button')) {
+                  return
+                }
+
+                hideDockTooltip(true)
+              }}
+            >
+              <LauncherGlyphIcon className="shell-dock__launcher" />
+            </DockIconButton>
+          )
+        })}
+      </div>
+    </nav>
   )
 }
 
@@ -704,7 +955,6 @@ export function ShellLayout({
 
     return null
   })
-  const [hoveredDockItemId, setHoveredDockItemId] = useState<string | null>(null)
   const [windowOrder, setWindowOrder] = useState<string[]>(() => {
     if (initialProjectWindowId) {
       return [initialProjectWindowId]
@@ -720,16 +970,12 @@ export function ShellLayout({
   const [selectedBackgroundId, setSelectedBackgroundId] = useState<ShellBackgroundId>(() =>
     readStoredShellBackgroundId(),
   )
-  const [isBackgroundMenuOpen, setIsBackgroundMenuOpen] = useState(false)
   const [weatherWidgetRect, setWeatherWidgetRect] = useState<WindowRect | null>(null)
   const [isWeatherWidgetDragging, setIsWeatherWidgetDragging] = useState(false)
   const shellRef = useRef<HTMLElement>(null)
   const systemBarRef = useRef<HTMLElement>(null)
-  const backgroundMenuRef = useRef<HTMLDivElement>(null)
   const dockRef = useRef<HTMLElement>(null)
   const shellBoundsRef = useRef({ left: 0, top: 0 })
-  const dockTooltipTimerRef = useRef<number | null>(null)
-  const dockTooltipPrimedRef = useRef(false)
   const windowFrameRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const weatherWidgetFrameRef = useRef<HTMLDivElement | null>(null)
   const dragSessionRef = useRef<DragSession | null>(null)
@@ -776,7 +1022,6 @@ export function ShellLayout({
     [activeProject],
   )
   const projectWindowId = projectApp?.windowId ?? null
-  const backgroundMenuId = useId()
   const sidebarView: ShellView = hasMissingProject ? 'projects' : view
   const selectedBackground = useMemo<ShellBackgroundDefinition>(
     () =>
@@ -912,34 +1157,57 @@ export function ShellLayout({
   }, [selectedBackgroundId])
 
   useEffect(() => {
-    if (!isBackgroundMenuOpen) {
+    const previewSources = shellBackgroundOptions
+      .map((option) => option.previewSrc)
+      .filter((previewSrc): previewSrc is string => previewSrc !== null)
+
+    if (!previewSources.length) {
       return
     }
 
-    const handlePointerDown = (event: PointerEvent) => {
-      const target = event.target instanceof Node ? event.target : null
+    let isCancelled = false
 
-      if (target && backgroundMenuRef.current?.contains(target)) {
+    const preloadPreviewImages = () => {
+      previewSources.forEach((previewSrc) => {
+        const previewImage = new Image()
+        previewImage.decoding = 'async'
+        previewImage.src = previewSrc
+
+        if (typeof previewImage.decode === 'function') {
+          void previewImage.decode().catch(() => {
+            // Ignore decode failures and fall back to normal browser caching.
+          })
+        }
+      })
+    }
+
+    const schedulePreload = () => {
+      if (isCancelled) {
         return
       }
 
-      setIsBackgroundMenuOpen(false)
+      preloadPreviewImages()
     }
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsBackgroundMenuOpen(false)
+    const requestIdleCallback = window.requestIdleCallback?.bind(window)
+    const cancelIdleCallback = window.cancelIdleCallback?.bind(window)
+
+    if (requestIdleCallback && cancelIdleCallback) {
+      const idleCallbackId = requestIdleCallback(schedulePreload, { timeout: 240 })
+
+      return () => {
+        isCancelled = true
+        cancelIdleCallback(idleCallbackId)
       }
     }
 
-    window.addEventListener('pointerdown', handlePointerDown)
-    window.addEventListener('keydown', handleKeyDown)
+    const timeoutId = window.setTimeout(schedulePreload, 120)
 
     return () => {
-      window.removeEventListener('pointerdown', handlePointerDown)
-      window.removeEventListener('keydown', handleKeyDown)
+      isCancelled = true
+      window.clearTimeout(timeoutId)
     }
-  }, [isBackgroundMenuOpen])
+  }, [])
 
   const clearEnteringFrames = (windowId: string) => {
     const frameIds = enteringFrameRef.current[windowId]
@@ -1063,14 +1331,6 @@ export function ShellLayout({
       finalizeWindowClose(windowId)
     }, windowLifecycleCloseDuration)
   }
-
-  useEffect(() => {
-    return () => {
-      if (dockTooltipTimerRef.current !== null) {
-        window.clearTimeout(dockTooltipTimerRef.current)
-      }
-    }
-  }, [])
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined') {
@@ -1367,36 +1627,21 @@ export function ShellLayout({
     updateView(entryId)
   }
 
-  const clearDockTooltipTimer = () => {
-    if (dockTooltipTimerRef.current !== null) {
-      window.clearTimeout(dockTooltipTimerRef.current)
-      dockTooltipTimerRef.current = null
-    }
-  }
-
-  const showDockTooltip = (itemId: string, delayed: boolean) => {
-    clearDockTooltipTimer()
-
-    if (reducedMotion || dockTooltipPrimedRef.current || !delayed) {
-      setHoveredDockItemId(itemId)
-      dockTooltipPrimedRef.current = true
+  const activateLauncherFromDock = () => {
+    if (hasMissingProject) {
+      recoverToShell('root')
+      openWindow(launcherWindowId)
       return
     }
 
-    dockTooltipTimerRef.current = window.setTimeout(() => {
-      setHoveredDockItemId(itemId)
-      dockTooltipPrimedRef.current = true
-      dockTooltipTimerRef.current = null
-    }, 96)
-  }
+    updateView('root')
 
-  const hideDockTooltip = (resetPrimed = false) => {
-    clearDockTooltipTimer()
-    setHoveredDockItemId(null)
-
-    if (resetPrimed) {
-      dockTooltipPrimedRef.current = false
+    if (isLauncherOpen) {
+      activateWindow(launcherWindowId)
+      return
     }
+
+    openWindow(launcherWindowId)
   }
 
   const openProject = (project: PublicProjectEntry) => {
@@ -1762,20 +2007,23 @@ export function ShellLayout({
     setIsWeatherWidgetDragging(false)
   }
 
-  const rootEntries: RootEntry[] = [
-    {
-      id: 'projects',
-      label: 'Projects',
-      caption: 'Experimentations',
-      meta: `${pieces.length} ${pieces.length === 1 ? 'public project' : 'public projects'}`,
-    },
-    {
-      id: 'about',
-      label: 'About',
-      caption: 'Read Me',
-      meta: 'Shell document',
-    },
-  ]
+  const rootEntries = useMemo<RootEntry[]>(
+    () => [
+      {
+        id: 'projects',
+        label: 'Projects',
+        caption: 'Experimentations',
+        meta: `${pieces.length} ${pieces.length === 1 ? 'public project' : 'public projects'}`,
+      },
+      {
+        id: 'about',
+        label: 'About',
+        caption: 'Read Me',
+        meta: 'Shell document',
+      },
+    ],
+    [pieces.length],
+  )
 
   const launcherRect =
     isLauncherOpen && desktopBounds
@@ -1797,64 +2045,89 @@ export function ShellLayout({
         desktopWindowEdgeInset,
       )
     : null
-  const desktopWindows: ShellWindowRecord[] = []
+  const desktopWindows = useMemo<ShellWindowRecord[]>(() => {
+    const nextDesktopWindows: ShellWindowRecord[] = []
 
-  if (isLauncherOpen && launcherRect) {
-    desktopWindows.push({
-      id: launcherApp.windowId,
-      appId: launcherApp.id,
-      kind: launcherApp.kind,
-      rect: launcherRect,
-      minWidth: launcherWindowDefaults.minWidth,
-      minHeight: launcherWindowDefaults.minHeight,
-    })
-  }
+    if (isLauncherOpen && launcherRect) {
+      nextDesktopWindows.push({
+        id: launcherApp.windowId,
+        appId: launcherApp.id,
+        kind: launcherApp.kind,
+        rect: launcherRect,
+        minWidth: launcherWindowDefaults.minWidth,
+        minHeight: launcherWindowDefaults.minHeight,
+      })
+    }
 
-  if (isAboutOpen && aboutRect) {
-    desktopWindows.push({
-      id: aboutApp.windowId,
-      appId: aboutApp.id,
-      kind: aboutApp.kind,
-      rect: aboutRect,
-      minWidth: aboutWindowDefaults.minWidth,
-      minHeight: aboutWindowDefaults.minHeight,
-    })
-  }
+    if (isAboutOpen && aboutRect) {
+      nextDesktopWindows.push({
+        id: aboutApp.windowId,
+        appId: aboutApp.id,
+        kind: aboutApp.kind,
+        rect: aboutRect,
+        minWidth: aboutWindowDefaults.minWidth,
+        minHeight: aboutWindowDefaults.minHeight,
+      })
+    }
 
-  if (projectApp && projectWindowId && projectRect) {
-    desktopWindows.push({
-      id: projectApp.windowId,
-      appId: projectApp.id,
-      kind: projectApp.kind,
-      rect: projectRect,
-      minWidth: projectWindowDefaults.minWidth,
-      minHeight: projectWindowDefaults.minHeight,
-    })
-  }
+    if (projectApp && projectWindowId && projectRect) {
+      nextDesktopWindows.push({
+        id: projectApp.windowId,
+        appId: projectApp.id,
+        kind: projectApp.kind,
+        rect: projectRect,
+        minWidth: projectWindowDefaults.minWidth,
+        minHeight: projectWindowDefaults.minHeight,
+      })
+    }
 
-  if (
-    closingProjectSnapshot &&
-    (!projectApp || projectApp.windowId !== closingProjectSnapshot.app.windowId)
-  ) {
-    desktopWindows.push({
-      id: closingProjectSnapshot.app.windowId,
-      appId: closingProjectSnapshot.app.id,
-      kind: closingProjectSnapshot.app.kind,
-      rect: closingProjectSnapshot.rect,
-      minWidth: projectWindowDefaults.minWidth,
-      minHeight: projectWindowDefaults.minHeight,
-    })
-  }
+    if (
+      closingProjectSnapshot &&
+      (!projectApp || projectApp.windowId !== closingProjectSnapshot.app.windowId)
+    ) {
+      nextDesktopWindows.push({
+        id: closingProjectSnapshot.app.windowId,
+        appId: closingProjectSnapshot.app.id,
+        kind: closingProjectSnapshot.app.kind,
+        rect: closingProjectSnapshot.rect,
+        minWidth: projectWindowDefaults.minWidth,
+        minHeight: projectWindowDefaults.minHeight,
+      })
+    }
 
-  const windowsById = Object.fromEntries(
-    desktopWindows.map((desktopWindow) => [desktopWindow.id, desktopWindow]),
-  ) as Record<string, ShellWindowRecord>
-  const orderedWindowIds = [
-    ...windowOrder.filter((windowId) => windowsById[windowId]),
-    ...desktopWindows
-      .map((desktopWindow) => desktopWindow.id)
-      .filter((windowId) => !windowOrder.includes(windowId)),
-  ]
+    return nextDesktopWindows
+  }, [
+    aboutApp.id,
+    aboutApp.kind,
+    aboutApp.windowId,
+    aboutRect,
+    closingProjectSnapshot,
+    isAboutOpen,
+    isLauncherOpen,
+    launcherApp.id,
+    launcherApp.kind,
+    launcherApp.windowId,
+    launcherRect,
+    projectApp,
+    projectRect,
+    projectWindowId,
+  ])
+  const windowsById = useMemo(
+    () =>
+      Object.fromEntries(
+        desktopWindows.map((desktopWindow) => [desktopWindow.id, desktopWindow]),
+      ) as Record<string, ShellWindowRecord>,
+    [desktopWindows],
+  )
+  const orderedWindowIds = useMemo(
+    () => [
+      ...windowOrder.filter((windowId) => windowsById[windowId]),
+      ...desktopWindows
+        .map((desktopWindow) => desktopWindow.id)
+        .filter((windowId) => !windowOrder.includes(windowId)),
+    ],
+    [desktopWindows, windowOrder, windowsById],
+  )
   const resolvedActiveWindowId =
     activeWindowId === null
       ? null
@@ -2357,94 +2630,12 @@ export function ShellLayout({
             </button>
             {systemBarMenuItems.map((item) => (
               item.label === 'Background' ? (
-                <div
+                <BackgroundMenuButton
                   key={item.label}
-                  ref={backgroundMenuRef}
-                  className={[
-                    'shell-system-bar__menu-group',
-                    item.collapseClassName,
-                    isBackgroundMenuOpen ? 'is-open' : '',
-                  ].filter(Boolean).join(' ')}
-                >
-                  <button
-                    type="button"
-                    className={[
-                      'shell-system-bar__button',
-                      'shell-system-bar__button--interactive',
-                      'shell-system-bar__menu-item',
-                      'shell-system-bar__menu-trigger',
-                    ].join(' ')}
-                    aria-expanded={isBackgroundMenuOpen}
-                    aria-controls={backgroundMenuId}
-                    aria-haspopup="menu"
-                    onClick={() => setIsBackgroundMenuOpen((current) => !current)}
-                  >
-                    <span>Background</span>
-                    <ChevronDownIcon className="shell-system-bar__menu-caret" />
-                  </button>
-
-                  <AnimatePresence>
-                    {isBackgroundMenuOpen ? (
-                      <motion.div
-                        id={backgroundMenuId}
-                        className="shell-background-menu"
-                        role="menu"
-                        aria-label="Desktop backgrounds"
-                        initial={reducedMotion ? false : { opacity: 0, y: -2 }}
-                        animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-                        exit={reducedMotion ? undefined : { opacity: 0, y: -1 }}
-                        transition={
-                          reducedMotion
-                            ? undefined
-                            : { duration: 0.13, ease: shellEase }
-                        }
-                      >
-                        <div className="shell-background-menu__list" role="none">
-                          {shellBackgroundOptions.map((option) => {
-                            const isSelected = option.id === selectedBackground.id
-
-                            return (
-                              <button
-                                key={option.id}
-                                type="button"
-                                role="menuitemradio"
-                                aria-checked={isSelected}
-                                className={[
-                                  'shell-background-menu__option',
-                                  isSelected ? 'is-selected' : '',
-                                ].filter(Boolean).join(' ')}
-                                onClick={() => {
-                                  setSelectedBackgroundId(option.id)
-                                  setIsBackgroundMenuOpen(false)
-                                }}
-                              >
-                                <span
-                                  className={[
-                                    'shell-background-menu__preview',
-                                    option.kind === 'animated'
-                                      ? 'shell-background-menu__preview--animated'
-                                      : '',
-                                  ].filter(Boolean).join(' ')}
-                                  aria-hidden="true"
-                                >
-                                  {option.previewSrc ? (
-                                    <img src={option.previewSrc} alt="" />
-                                  ) : (
-                                    <span className="shell-background-menu__preview-animated-dot" />
-                                  )}
-                                </span>
-                                <span className="shell-background-menu__label">{option.label}</span>
-                                <span className="shell-background-menu__check" aria-hidden="true">
-                                  {isSelected ? <CheckIcon /> : null}
-                                </span>
-                              </button>
-                            )
-                          })}
-                        </div>
-                      </motion.div>
-                    ) : null}
-                  </AnimatePresence>
-                </div>
+                  reducedMotion={reducedMotion}
+                  selectedBackground={selectedBackground}
+                  onSelectBackground={setSelectedBackgroundId}
+                />
               ) : (
                 <button
                   key={item.label}
@@ -2596,61 +2787,12 @@ export function ShellLayout({
         })}
       </div>
 
-      <nav ref={dockRef} className="shell-dock" aria-label="Dock">
-        <div className="shell-dock__inner" onPointerLeave={() => hideDockTooltip(true)}>
-          {dockItems.map((item) => {
-            const handleActivate = () => {
-              if (hasMissingProject) {
-                recoverToShell('root')
-                openWindow(launcherWindowId)
-                return
-              }
-
-              updateView('root')
-              if (isLauncherOpen) {
-                activateWindow(launcherWindowId)
-                return
-              }
-
-              openWindow(launcherWindowId)
-            }
-
-            return (
-              <DockIconButton
-                key={item.id}
-                label={item.label}
-                kind={item.kind}
-                isActive={isLauncherOpen}
-                reducedMotion={reducedMotion}
-                onActivate={handleActivate}
-                showTooltip={hoveredDockItemId === item.id}
-                onTooltipPointerEnter={() => showDockTooltip(item.id, true)}
-                onTooltipPointerLeave={(event) => {
-                  const next = event.relatedTarget instanceof HTMLElement ? event.relatedTarget : null
-
-                  if (next?.closest('.shell-dock__button')) {
-                    return
-                  }
-
-                  hideDockTooltip()
-                }}
-                onTooltipFocus={() => showDockTooltip(item.id, false)}
-                onTooltipBlur={(event) => {
-                  const next = event.relatedTarget instanceof HTMLElement ? event.relatedTarget : null
-
-                  if (next?.closest('.shell-dock__button')) {
-                    return
-                  }
-
-                  hideDockTooltip(true)
-                }}
-              >
-                <LauncherGlyphIcon className="shell-dock__launcher" />
-              </DockIconButton>
-            )
-          })}
-        </div>
-      </nav>
+      <ShellDock
+        dockRef={dockRef}
+        reducedMotion={reducedMotion}
+        isLauncherOpen={isLauncherOpen}
+        onActivateLauncher={activateLauncherFromDock}
+      />
     </motion.main>
   )
 }

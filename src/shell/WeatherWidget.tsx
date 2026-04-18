@@ -303,28 +303,28 @@ function RefreshIcon(props: SVGProps<SVGSVGElement>) {
       <path
         d="M12.85 6.2A4.95 4.95 0 0 0 3.5 4.65"
         stroke="currentColor"
-        strokeWidth="1.35"
+        strokeWidth="1.25"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M3.45 2.75v2.15H5.6"
         stroke="currentColor"
-        strokeWidth="1.35"
+        strokeWidth="1.25"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M3.15 9.8a4.95 4.95 0 0 0 9.35 1.55"
         stroke="currentColor"
-        strokeWidth="1.35"
+        strokeWidth="1.25"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M12.55 13.25v-2.15H10.4"
         stroke="currentColor"
-        strokeWidth="1.35"
+        strokeWidth="1.25"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -348,7 +348,7 @@ function WeatherGlyph({
         <path
           d="M10 1.9V4.1M10 15.9V18.1M18.1 10H15.9M4.1 10H1.9M15.6 4.4L14.05 5.95M5.95 14.05L4.4 15.6M15.6 15.6L14.05 14.05M5.95 5.95L4.4 4.4"
           stroke="currentColor"
-          strokeWidth="1.35"
+          strokeWidth="1.2"
           strokeLinecap="round"
         />
       </svg>
@@ -369,9 +369,9 @@ function WeatherGlyph({
         <path
           d="M8 2.4v1.45M8 10.15v1.45M12.6 7H11.15M4.85 7H3.4M10.95 4.05l-.98.98M6.03 8.97l-.98.98"
           stroke="currentColor"
-          strokeWidth="1.2"
+          strokeWidth="1.1"
           strokeLinecap="round"
-          opacity={isDay ? '0.86' : '0.58'}
+          opacity={isDay ? '0.8' : '0.54'}
         />
         <path
           d="M7.7 16.1h8.05a2.85 2.85 0 0 0 .36-5.68A4.25 4.25 0 0 0 8 11.15a2.55 2.55 0 0 0-.3 4.95Z"
@@ -391,9 +391,9 @@ function WeatherGlyph({
         <path
           d="M5 15.35h12M6.4 17.55h9.2"
           stroke="currentColor"
-          strokeWidth="1.25"
+          strokeWidth="1.15"
           strokeLinecap="round"
-          opacity="0.72"
+          opacity="0.66"
         />
       </svg>
     )
@@ -409,9 +409,9 @@ function WeatherGlyph({
         <path
           d="M8.15 13.75l-1.1 2.2M12 13.75l-1.1 2.2M15.85 13.75l-1.1 2.2"
           stroke="currentColor"
-          strokeWidth="1.3"
+          strokeWidth="1.18"
           strokeLinecap="round"
-          opacity="0.82"
+          opacity="0.76"
         />
       </svg>
     )
@@ -427,9 +427,9 @@ function WeatherGlyph({
         <path
           d="M8.4 14.1v2.3M7.25 15.25h2.3M12 14.1v2.3M10.85 15.25h2.3M15.6 14.1v2.3M14.45 15.25h2.3"
           stroke="currentColor"
-          strokeWidth="1.15"
+          strokeWidth="1.05"
           strokeLinecap="round"
-          opacity="0.84"
+          opacity="0.78"
         />
       </svg>
     )

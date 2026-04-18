@@ -1,3 +1,6 @@
+import frostVeilPreviewUrl from './assets/previews/background3-preview.jpg'
+import liquidHorizonPreviewUrl from './assets/previews/background2-preview.jpg'
+import opalineMistPreviewUrl from './assets/previews/background1-preview.jpg'
 import frostVeilUrl from './assets/background3.jpg'
 import liquidHorizonUrl from './assets/background2.jpg'
 import opalineMistUrl from './assets/background1.jpg'
@@ -25,21 +28,21 @@ export const shellBackgroundOptions: ShellBackgroundDefinition[] = [
     id: 'opaline-mist',
     kind: 'static',
     label: 'Opaline Mist',
-    previewSrc: opalineMistUrl,
+    previewSrc: opalineMistPreviewUrl,
     desktopSrc: opalineMistUrl,
   },
   {
     id: 'liquid-horizon',
     kind: 'static',
     label: 'Liquid Horizon',
-    previewSrc: liquidHorizonUrl,
+    previewSrc: liquidHorizonPreviewUrl,
     desktopSrc: liquidHorizonUrl,
   },
   {
     id: 'frost-veil',
     kind: 'static',
     label: 'Frost Veil',
-    previewSrc: frostVeilUrl,
+    previewSrc: frostVeilPreviewUrl,
     desktopSrc: frostVeilUrl,
   },
 ]

@@ -475,17 +475,17 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--shell-solid-window-border) 82%, rgba(255, 255, 255, 0.28));
+  border: 1px solid color-mix(in srgb, var(--shell-solid-window-border) 76%, rgba(255, 255, 255, 0.24));
   border-radius: 1.3rem;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(244, 248, 253, 0.22)),
-    color-mix(in srgb, var(--shell-surface-chrome) 74%, var(--shell-surface-paper) 26%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.44), rgba(241, 246, 252, 0.12)),
+    color-mix(in srgb, var(--shell-surface-chrome) 68%, var(--shell-surface-paper) 32%);
   box-shadow:
-    0 22px 38px rgba(66, 80, 104, 0.11),
-    0 10px 22px rgba(66, 80, 104, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.74);
-  backdrop-filter: blur(22px) saturate(126%);
-  -webkit-backdrop-filter: blur(22px) saturate(126%);
+    0 18px 30px rgba(66, 80, 104, 0.1),
+    0 8px 18px rgba(66, 80, 104, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(20px) saturate(118%);
+  -webkit-backdrop-filter: blur(20px) saturate(118%);
 }
 
 .weather-widget__surface::before,
@@ -499,17 +499,17 @@
 
 .weather-widget__surface::before {
   background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.34), transparent 44%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 38%, transparent 72%),
-    linear-gradient(180deg, rgba(214, 224, 237, 0.22), rgba(214, 224, 237, 0.08));
-  opacity: 0.94;
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.25), transparent 40%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(213, 223, 236, 0.14), rgba(213, 223, 236, 0.04));
+  opacity: 0.88;
 }
 
 .weather-widget__surface::after {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(17, 24, 34, 0.08));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(17, 24, 34, 0.07));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.52),
-    inset 0 0 0 1px color-mix(in srgb, var(--shell-solid-window-edge) 64%, transparent);
+    inset 0 1px 0 rgba(255, 255, 255, 0.44),
+    inset 0 0 0 1px color-mix(in srgb, var(--shell-solid-window-edge) 56%, transparent);
 }
 
 .weather-widget__header,
@@ -519,7 +519,7 @@
 }
 
 .weather-widget__header {
-  padding: 0.92rem 1rem 0.14rem;
+  padding: 0.86rem 1rem 0.08rem;
 }
 
 .weather-widget__location-block {
@@ -539,21 +539,21 @@
 }
 
 .weather-widget__eyebrow {
-  color: color-mix(in srgb, var(--shell-text-soft) 88%, transparent);
-  font-size: 0.66rem;
+  color: color-mix(in srgb, var(--shell-text-soft) 74%, transparent);
+  font-size: 0.62rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
 .weather-widget__location {
-  margin-top: 0.26rem;
+  margin-top: 0.22rem;
   overflow: hidden;
-  color: color-mix(in srgb, var(--shell-text) 94%, black 6%);
-  font-size: 0.96rem;
-  font-weight: 600;
-  line-height: 1.14;
-  letter-spacing: -0.018em;
+  color: color-mix(in srgb, var(--shell-text) 91%, black 9%);
+  font-size: 0.98rem;
+  font-weight: 590;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -562,60 +562,60 @@
   min-height: 0;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  gap: 0.68rem;
-  padding: 0 1rem 0.92rem;
+  gap: 0.78rem;
+  padding: 0 1rem 0.9rem;
 }
 
 .weather-widget__main {
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.72rem;
+  gap: 0.88rem;
   align-items: end;
 }
 
 .weather-widget__temperature-block {
   min-width: 0;
   display: grid;
-  gap: 0.22rem;
+  gap: 0.26rem;
 }
 
 .weather-widget__temperature {
-  color: color-mix(in srgb, var(--shell-text-strong) 96%, var(--shell-text) 4%);
-  font-size: 3rem;
+  color: color-mix(in srgb, var(--shell-text-strong) 98%, var(--shell-text) 2%);
+  font-size: 3.08rem;
   font-weight: 510;
-  line-height: 0.88;
-  letter-spacing: -0.055em;
+  line-height: 0.84;
+  letter-spacing: -0.06em;
 }
 
 .weather-widget__temperature-unit {
-  color: color-mix(in srgb, var(--shell-text-soft) 72%, var(--shell-text) 28%);
-  font-size: 0.58em;
-  font-weight: 540;
+  color: color-mix(in srgb, var(--shell-text-soft) 60%, var(--shell-text) 40%);
+  font-size: 0.52em;
+  font-weight: 520;
   vertical-align: top;
 }
 
 .weather-widget__feels-like {
-  color: color-mix(in srgb, var(--shell-text-soft) 80%, var(--shell-text) 20%);
-  font-size: 0.74rem;
-  font-weight: 530;
+  color: color-mix(in srgb, var(--shell-text-soft) 66%, transparent);
+  font-size: 0.71rem;
+  font-weight: 510;
   letter-spacing: -0.012em;
 }
 
 .weather-widget__condition {
   display: grid;
   justify-items: end;
-  gap: 0.38rem;
+  gap: 0.3rem;
   text-align: right;
 }
 
 .weather-widget__condition-glyph {
-  width: 2rem;
-  height: 2rem;
+  width: 1.82rem;
+  height: 1.82rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: color-mix(in srgb, var(--shell-text) 86%, var(--shell-text-soft) 14%);
+  color: color-mix(in srgb, var(--shell-text) 76%, var(--shell-text-soft) 24%);
 }
 
 .weather-widget__condition-glyph svg {
@@ -625,39 +625,41 @@
 
 .weather-widget__condition-copy {
   display: grid;
-  gap: 0.2rem;
+  gap: 0.14rem;
 }
 
 .weather-widget__condition-label {
-  color: color-mix(in srgb, var(--shell-text) 90%, var(--shell-text-soft) 10%);
-  font-size: 0.82rem;
-  font-weight: 580;
-  letter-spacing: -0.016em;
+  color: color-mix(in srgb, var(--shell-text) 78%, var(--shell-text-soft) 22%);
+  font-size: 0.79rem;
+  font-weight: 560;
+  letter-spacing: -0.017em;
 }
 
 .weather-widget__range {
-  color: color-mix(in srgb, var(--shell-text-soft) 80%, var(--shell-text) 20%);
-  font-size: 0.74rem;
-  font-weight: 530;
+  color: color-mix(in srgb, var(--shell-text-soft) 66%, transparent);
+  font-size: 0.71rem;
+  font-weight: 510;
   letter-spacing: -0.012em;
 }
 
 .weather-widget__footer {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.72rem;
+  gap: 0.56rem;
   align-items: center;
 }
 
 .weather-widget__hourly {
   min-width: 0;
+  padding-top: 0.42rem;
+  border-top: 1px solid color-mix(in srgb, var(--shell-solid-window-edge) 38%, transparent);
 }
 
 .weather-widget__hourly-list {
   list-style: none;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.38rem;
+  gap: 0.22rem;
   margin: 0;
   padding: 0;
 }
@@ -665,20 +667,21 @@
 .weather-widget__hourly-point {
   min-width: 0;
   display: grid;
-  gap: 0.18rem;
+  justify-items: start;
+  gap: 0.12rem;
 }
 
 .weather-widget__hourly-label {
-  color: color-mix(in srgb, var(--shell-text-soft) 82%, var(--shell-text) 18%);
-  font-size: 0.7rem;
-  font-weight: 560;
+  color: color-mix(in srgb, var(--shell-text-soft) 68%, transparent);
+  font-size: 0.67rem;
+  font-weight: 540;
   letter-spacing: -0.012em;
 }
 
 .weather-widget__hourly-temp {
-  color: color-mix(in srgb, var(--shell-text) 88%, var(--shell-text-soft) 12%);
-  font-size: 0.75rem;
-  font-weight: 560;
+  color: color-mix(in srgb, var(--shell-text) 80%, var(--shell-text-soft) 20%);
+  font-size: 0.72rem;
+  font-weight: 545;
   letter-spacing: -0.014em;
 }
 
@@ -686,29 +689,29 @@
   display: inline-flex;
   min-height: 1.98rem;
   align-items: center;
-  color: color-mix(in srgb, var(--shell-text-soft) 86%, var(--shell-text) 14%);
-  font-size: 0.74rem;
-  font-weight: 530;
+  color: color-mix(in srgb, var(--shell-text-soft) 72%, transparent);
+  font-size: 0.72rem;
+  font-weight: 510;
   letter-spacing: -0.012em;
 }
 
 .weather-widget__refresh {
-  width: 2rem;
-  height: 2rem;
+  width: 1.82rem;
+  height: 1.82rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   align-self: center;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--shell-control-border) 90%, transparent);
-  border-radius: 0.68rem;
+  border: 1px solid color-mix(in srgb, var(--shell-control-border) 54%, transparent);
+  border-radius: 0.62rem;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.08)),
-    color-mix(in srgb, var(--shell-control-surface) 84%, transparent);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.04)),
+    color-mix(in srgb, var(--shell-control-surface) 52%, transparent);
   box-shadow:
-    0 6px 12px rgba(89, 103, 130, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  color: color-mix(in srgb, var(--shell-text-soft) 84%, var(--shell-text) 16%);
+    0 3px 8px rgba(89, 103, 130, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  color: color-mix(in srgb, var(--shell-text-soft) 68%, var(--shell-text) 32%);
   cursor: pointer;
   transition:
     transform var(--shell-duration-fast) var(--shell-ease-out),
@@ -727,13 +730,14 @@
 .weather-widget__refresh:focus-visible {
   box-shadow:
     0 0 0 3px var(--shell-focus-ring),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    0 4px 10px rgba(89, 103, 130, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
   outline: none;
 }
 
 .weather-widget__refresh-icon {
-  width: 0.92rem;
-  height: 0.92rem;
+  width: 0.84rem;
+  height: 0.84rem;
 }
 
 .weather-widget__refresh-icon.is-spinning {
@@ -992,8 +996,14 @@
   bottom: -1px;
   height: 0.7rem;
   pointer-events: none;
+  z-index: 0;
   background: var(--shell-titlebar-under-edge);
   opacity: var(--shell-titlebar-under-edge-opacity);
+}
+
+.shell-window__titlebar > * {
+  position: relative;
+  z-index: 1;
 }
 
 .shell-window__toolbar {
@@ -1412,8 +1422,6 @@ button.shell-window__traffic-light:focus-visible {
       color-mix(in srgb, var(--shell-surface-navigation) 86%, var(--shell-surface-paper-muted) 14%)
     );
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(16px) saturate(134%);
-  -webkit-backdrop-filter: blur(16px) saturate(134%);
   transition:
     background var(--shell-duration-mid) var(--shell-ease-out),
     border-color var(--shell-duration-mid) var(--shell-ease-out),
@@ -2837,15 +2845,15 @@ button.shell-window__traffic-light:focus-visible {
 
   .weather-widget__refresh:hover,
   .weather-widget__refresh:focus-visible {
-    transform: translateY(-0.01rem);
-    border-color: color-mix(in srgb, var(--shell-control-border) 96%, transparent);
+    transform: translateY(-0.005rem);
+    border-color: color-mix(in srgb, var(--shell-control-border) 68%, transparent);
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0.12)),
-      color-mix(in srgb, var(--shell-control-hover) 72%, var(--shell-control-surface) 28%);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.08)),
+      color-mix(in srgb, var(--shell-control-hover) 52%, var(--shell-control-surface) 48%);
     box-shadow:
-      0 7px 14px rgba(89, 103, 130, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.56);
-    color: var(--shell-text);
+      0 5px 10px rgba(89, 103, 130, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.44);
+    color: color-mix(in srgb, var(--shell-text) 92%, var(--shell-text-soft) 8%);
   }
 
   .shell-toolbar__back:hover {

@@ -10,7 +10,7 @@ const ROLLIN_SEARCH_SPEC = {
   openHeight: 44,
   trackRadius: 48,
   ballTravel: 96,
-  closedBallLeft: 94,
+  closedBallLeft: 92,
   ballDockInset: 0.5,
   accentWidth: 1,
   accentHeight: 20,
