@@ -6,7 +6,7 @@ import type {
   PieceMeta,
   PublicProjectEntry,
 } from './types'
-import { meta as example1Meta } from './example1/meta'
+import { meta as example1Meta } from './access-card/meta'
 import { meta as rollinSearchMeta } from './rollin-search/meta'
 import { meta as tripToMaltaMeta } from './trip-to-malta/meta'
 
@@ -33,7 +33,7 @@ function definePiece(manifest: PieceManifest, importer: PieceImporter): PieceMet
 export const pieceRegistry: PieceMeta[] = [
   definePiece(tripToMaltaMeta, () => import('./trip-to-malta/Piece')),
   definePiece(rollinSearchMeta, () => import('./rollin-search/Piece')),
-  definePiece(example1Meta, () => import('./example1/Piece')),
+  definePiece(example1Meta, () => import('./access-card/Piece')),
 ].sort((left, right) => left.order - right.order)
 
 export const lazyPieceComponents = Object.fromEntries(
