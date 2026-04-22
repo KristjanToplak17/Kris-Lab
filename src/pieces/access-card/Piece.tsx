@@ -10,18 +10,18 @@ const lockedDisplayCopy = '********'
 const unlockedDisplayCopy = 'ADMIN'
 
 const phaseDuration = {
-  idleLocked: 520,
-  entry: 980,
-  scanHold: 1800,
-  unlockResolved: 840,
-  exit: 1260,
-  reset: 220,
+  idleLocked: 420,
+  entry: 940,
+  scanHold: 2000,
+  unlockResolved: 380,
+  exit: 1160,
+  reset: 180,
 } as const
 
 const exitTiming = {
-  dimEnd: 260,
-  fadeMinElapsed: 980,
-  relockEnd: 700,
+  dimEnd: 240,
+  fadeMinElapsed: 780,
+  relockEnd: 540,
 } as const
 
 const visibilityAnchors = {
@@ -33,78 +33,81 @@ const visibilityAnchors = {
 } as const
 
 const entryTiming = {
+  fadeInDuration: 168,
   motionEndProgress: 0.92,
+  seamLeadInMs: 110,
 } as const
 
 const buttonTiming = {
-  activateDuration: 360,
+  activateDuration: 260,
   dimDuration: exitTiming.dimEnd,
-  onsetDelayAfterAdmin: 40,
+  groupGapDuration: 420,
+  onsetDelayAfterResolve: 92,
 } as const
 
 const scanFxTiming = {
-  seamDelayMs: 40,
-  seamFadeInMs: 160,
-  particleDelayMs: 220,
-  particleFadeInMs: 320,
-  peakStartMs: 620,
-  peakEndMs: 1500,
-  unlockPeakHoldMs: 300,
-  exitSeamFadeMs: 120,
-  exitParticleHoldMs: 180,
-  exitParticleFadeMs: 360,
+  seamDelayMs: 18,
+  seamFadeInMs: 132,
+  particleDelayMs: 112,
+  particleFadeInMs: 220,
+  peakStartMs: 260,
+  peakEndMs: 620,
+  unlockPeakHoldMs: 180,
+  exitSeamFadeMs: 110,
+  exitParticleHoldMs: 84,
+  exitParticleFadeMs: 220,
 } as const
 
 const scanSeamStyle = {
-  bloomHeightMultiplier: 1.58,
-  bloomOpacity: 0.34,
-  coreOpacity: 0.96,
+  bloomHeightMultiplier: 1.46,
+  bloomOpacity: 0.255,
+  coreOpacity: 0.9,
   hostWidthPx: 8,
-  leftBloomSpreadPx: 17,
-  pulseStrength: 0.06,
+  leftBloomSpreadPx: 15,
+  pulseStrength: 0.025,
   rightBloomSpreadPx: 3,
-  thicknessPx: 0.9,
+  thicknessPx: 0.82,
 } as const
 
 const scanParticleStyle = {
-  count: 20,
+  count: 13,
   driftBiasX: -0.5,
   driftBiasY: -0.62,
   emitterInsideReaderPx: 1,
   emitterNarrowHeightPercent: 78,
   emitterNarrowWidthPercent: 4,
   emitterWideHeightPercent: 92,
-  emitterWideWidthPercent: 12,
+  emitterWideWidthPercent: 15,
   lifeDurationRangeSeconds: [2.8, 4] as const,
-  maskCenterXPercent: 88,
+  maskCenterXPercent: 85,
   maskCenterYPercent: 48,
   maskMidStopPercent: 54,
   maskOuterStopPercent: 82,
-  opacityRange: [0.28, 0.6] as const,
+  opacityRange: [0.18, 0.46] as const,
   palette: ['#74c7ff', '#8b7dff', '#6fe4ff', '#a391ff'] as const,
   randomness: 0.16,
-  sizeRange: [1.2, 2.4] as const,
-  speedRange: [0.08, 0.18] as const,
+  sizeRange: [1.0, 2.0] as const,
+  speedRange: [0.07, 0.15] as const,
   zoneHeightRatio: 1.3,
   zoneTopOffsetMultiplier: -0.2,
   zoneWidthPx: 58,
 } as const
 
 const buttonState = {
-  activeColor: [255, 255, 255] as const,
-  activeGlowAlpha: 0.42,
-  activeGlowPx: 6.5,
-  activeOpacity: 1,
-  inactiveColor: [172, 180, 190] as const,
-  inactiveGlowAlpha: 0.03,
-  inactiveGlowPx: 0.6,
-  inactiveOpacity: 0.32,
+  activeColor: [248, 251, 255] as const,
+  activeGlowAlpha: 0.18,
+  activeGlowPx: 1.8,
+  activeOpacity: 0.98,
+  inactiveColor: [160, 169, 181] as const,
+  inactiveGlowAlpha: 0,
+  inactiveGlowPx: 0,
+  inactiveOpacity: 0.22,
 } as const
 
 const displayOpacity = {
-  decrypting: 0.82,
+  decrypting: 0.8,
   locked: 0.68,
-  unlocked: 0.92,
+  unlocked: 0.96,
 } as const
 
 const phaseTable = [
@@ -145,10 +148,17 @@ type TimelinePhase = {
 }
 
 type ScanFxState = {
+  activeInEntry: boolean
   particlesActive: boolean
   particlesOpacity: number
   seamBloomOpacity: number
   seamCoreOpacity: number
+}
+
+type ButtonVisualState = {
+  color: string
+  filter: string
+  opacity: number
 }
 
 const loopDurationMs = phaseTable.reduce((total, [, duration]) => total + duration, 0)
@@ -176,10 +186,10 @@ const relockFrames = [
 ] as const
 
 const entryEase = createBezierEasing(0.16, 0.84, 0.22, 1)
-const exitEase = createBezierEasing(0.18, 0.5, 0.5, 1)
-const fadeEase = createBezierEasing(0.18, 0.3, 0.5, 1)
+const exitEase = createBezierEasing(0.46, 0.1, 0.78, 0.34)
+const fadeEase = createBezierEasing(0.24, 0.18, 0.58, 0.98)
 const scanFxEase = createBezierEasing(0.18, 0.0, 0.28, 1)
-const scanFxExitEase = createBezierEasing(0.14, 0.0, 0.08, 1)
+const scanFxExitEase = createBezierEasing(0.32, 0.0, 0.18, 1)
 
 const scanParticlesConfig = {
   autoPlay: false,
@@ -376,24 +386,44 @@ function getDisplayState(phase: TimelinePhase): DisplayState {
   }
 }
 
-function getButtonVisualState(phase: TimelinePhase) {
-  let progress = 0
-  const activateStart = 812 + buttonTiming.onsetDelayAfterAdmin
-  const activateCarry = phaseDuration.scanHold - activateStart
+function getButtonVisualState(phase: TimelinePhase): ButtonVisualState[] {
+  const resolveRevealStart = unlockFrames[unlockFrames.length - 2].end
+  const activateStart = resolveRevealStart + buttonTiming.onsetDelayAfterResolve
+  const pairStarts = [
+    activateStart + buttonTiming.groupGapDuration,
+    activateStart,
+    activateStart,
+    activateStart + buttonTiming.groupGapDuration,
+  ] as const
 
-  if (phase.name === 'scanHold' && phase.elapsed >= activateStart) {
-    progress = clamp01((phase.elapsed - activateStart) / buttonTiming.activateDuration)
-  } else if (phase.name === 'unlockResolved') {
-    progress = clamp01((phase.elapsed + activateCarry) / buttonTiming.activateDuration)
-  } else if (phase.name === 'exit') {
-    progress = 1 - clamp01(phase.elapsed / buttonTiming.dimDuration)
-  }
+  const phaseElapsed =
+    phase.name === 'scanHold'
+      ? phase.elapsed
+      : phase.name === 'unlockResolved'
+        ? phaseDuration.scanHold + phase.elapsed
+        : null
 
-  return {
-    color: `rgb(${Math.round(mix(buttonState.inactiveColor[0], buttonState.activeColor[0], progress))}, ${Math.round(mix(buttonState.inactiveColor[1], buttonState.activeColor[1], progress))}, ${Math.round(mix(buttonState.inactiveColor[2], buttonState.activeColor[2], progress))})`,
-    filter: `drop-shadow(0 0 ${mix(buttonState.inactiveGlowPx, buttonState.activeGlowPx, progress).toFixed(2)}px rgba(223, 230, 240, ${mix(buttonState.inactiveGlowAlpha, buttonState.activeGlowAlpha, progress).toFixed(3)}))`,
-    opacity: mix(buttonState.inactiveOpacity, buttonState.activeOpacity, progress),
-  }
+  return pairStarts.map((pairStart) => {
+    let progress = 0
+
+    if (phaseElapsed !== null && phaseElapsed >= pairStart) {
+      progress = clamp01((phaseElapsed - pairStart) / buttonTiming.activateDuration)
+    } else if (phase.name === 'exit') {
+      progress = 1 - clamp01(phase.elapsed / buttonTiming.dimDuration)
+    }
+
+    const glowAlpha = mix(buttonState.inactiveGlowAlpha, buttonState.activeGlowAlpha, progress)
+    const glowPx = mix(buttonState.inactiveGlowPx, buttonState.activeGlowPx, progress)
+
+    return {
+      color: `rgb(${Math.round(mix(buttonState.inactiveColor[0], buttonState.activeColor[0], progress))}, ${Math.round(mix(buttonState.inactiveColor[1], buttonState.activeColor[1], progress))}, ${Math.round(mix(buttonState.inactiveColor[2], buttonState.activeColor[2], progress))})`,
+      filter:
+        glowAlpha > 0.001
+          ? `drop-shadow(0 0 ${glowPx.toFixed(2)}px rgba(236, 242, 249, ${glowAlpha.toFixed(3)}))`
+          : 'none',
+      opacity: mix(buttonState.inactiveOpacity, buttonState.activeOpacity, progress),
+    }
+  })
 }
 
 function resolveGeometry(
@@ -438,11 +468,21 @@ function resolveGeometry(
 
 function getScanFxState(phase: TimelinePhase): ScanFxState {
   if (phase.name === 'idleLocked' || phase.name === 'entry' || phase.name === 'reset') {
+    const entryTailProgress =
+      phase.name === 'entry'
+        ? rangedProgress(
+            phase.elapsed,
+            phaseDuration.entry - entryTiming.seamLeadInMs,
+            entryTiming.seamLeadInMs,
+          )
+        : 0
+
     return {
+      activeInEntry: entryTailProgress > 0.01,
       particlesActive: false,
       particlesOpacity: 0,
-      seamBloomOpacity: 0,
-      seamCoreOpacity: 0,
+      seamBloomOpacity: mix(0, 0.11, entryTailProgress),
+      seamCoreOpacity: mix(0, 0.34, entryTailProgress),
     }
   }
 
@@ -502,6 +542,7 @@ function getScanFxState(phase: TimelinePhase): ScanFxState {
     seamBloomOpacity += scanSeamStyle.pulseStrength * (0.5 + 0.5 * Math.sin(pulsePhase))
 
     return {
+      activeInEntry: false,
       particlesActive: particlesOpacity > 0.01,
       particlesOpacity,
       seamBloomOpacity,
@@ -529,6 +570,7 @@ function getScanFxState(phase: TimelinePhase): ScanFxState {
         : easedMix(0.82, 0.58, unlockFadeProgress)
 
     return {
+      activeInEntry: false,
       particlesActive: true,
       particlesOpacity,
       seamBloomOpacity,
@@ -575,6 +617,7 @@ function getScanFxState(phase: TimelinePhase): ScanFxState {
     }
 
     return {
+      activeInEntry: false,
       particlesActive:
         phase.elapsed < scanFxTiming.exitParticleHoldMs + scanFxTiming.exitParticleFadeMs,
       particlesOpacity,
@@ -584,6 +627,7 @@ function getScanFxState(phase: TimelinePhase): ScanFxState {
   }
 
   return {
+    activeInEntry: false,
     particlesActive: false,
     particlesOpacity: 0,
     seamBloomOpacity: 0,
@@ -713,7 +757,7 @@ export default function Piece({ meta }: PieceComponentProps) {
 
     const applyStaticState = () => {
       const phase = getPhase(0)
-      const buttonVisualState = getButtonVisualState(phase)
+      const buttonVisualStates = getButtonVisualState(phase)
 
       card.style.opacity = '1'
       card.style.transform = `translate3d(${geometry.scanRest.toFixed(2)}px, 0, 0)`
@@ -725,7 +769,8 @@ export default function Piece({ meta }: PieceComponentProps) {
       particlesHost.style.opacity = '0'
       syncParticlesPlayback(false)
 
-      for (const buttonShape of buttonShapes) {
+      for (const [index, buttonShape] of buttonShapes.entries()) {
+        const buttonVisualState = buttonVisualStates[index]
         buttonShape.style.color = buttonVisualState.color
         buttonShape.style.filter = buttonVisualState.filter
         buttonShape.style.opacity = buttonVisualState.opacity.toFixed(3)
@@ -735,7 +780,7 @@ export default function Piece({ meta }: PieceComponentProps) {
     const applyVisualState = (loopMs: number) => {
       const phase = getPhase(loopMs)
       const displayState = getDisplayState(phase)
-      const buttonVisualState = getButtonVisualState(phase)
+      const buttonVisualStates = getButtonVisualState(phase)
       const scanFxState = getScanFxState(phase)
 
       let cardOpacity = 1
@@ -747,6 +792,7 @@ export default function Piece({ meta }: PieceComponentProps) {
       } else if (phase.name === 'entry') {
         const motionProgress = clamp01(phase.progress / entryTiming.motionEndProgress)
         cardX = mix(geometry.offLeft, geometry.scanRest, entryEase(motionProgress))
+        cardOpacity = mix(0, 1, clamp01(phase.elapsed / entryTiming.fadeInDuration))
       } else if (phase.name === 'exit') {
         cardX = mix(geometry.scanRest, geometry.offRight, exitEase(phase.progress))
 
@@ -773,9 +819,10 @@ export default function Piece({ meta }: PieceComponentProps) {
       seam.style.setProperty('--scan-seam-core-opacity', scanFxState.seamCoreOpacity.toFixed(3))
       seam.style.setProperty('--scan-seam-bloom-opacity', scanFxState.seamBloomOpacity.toFixed(3))
       particlesHost.style.opacity = scanFxState.particlesOpacity.toFixed(3)
-      syncParticlesPlayback(scanFxState.particlesActive)
+      syncParticlesPlayback(scanFxState.particlesActive && !scanFxState.activeInEntry)
 
-      for (const buttonShape of buttonShapes) {
+      for (const [index, buttonShape] of buttonShapes.entries()) {
+        const buttonVisualState = buttonVisualStates[index]
         buttonShape.style.color = buttonVisualState.color
         buttonShape.style.filter = buttonVisualState.filter
         buttonShape.style.opacity = buttonVisualState.opacity.toFixed(3)

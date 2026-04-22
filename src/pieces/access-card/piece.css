@@ -1,14 +1,14 @@
 .project-three-rbac-piece {
   --rbac-scale: 1.25;
-  --scan-seam-core-color: rgba(196, 231, 255, 0.9);
-  --scan-seam-glow-color-a: rgba(116, 199, 255, 0.35);
-  --scan-seam-glow-color-b: rgba(139, 125, 255, 0.35);
-  --scan-seam-bloom-height-multiplier: 0.7;
-  --scan-seam-bloom-width: calc(40px * var(--rbac-scale));
+  --scan-seam-core-color: rgba(198, 232, 255, 0.88);
+  --scan-seam-glow-color-a: rgba(120, 200, 255, 0.22);
+  --scan-seam-glow-color-b: rgba(146, 161, 255, 0.12);
+  --scan-seam-bloom-height-multiplier: 0.62;
+  --scan-seam-bloom-width: calc(32px * var(--rbac-scale));
   --scan-seam-host-width: calc(12px * var(--rbac-scale));
   --scan-seam-left-bloom-spread: calc(0px * var(--rbac-scale));
-  --scan-seam-right-bloom-spread: calc(4px * var(--rbac-scale));
-  --scan-seam-thickness: calc(1px * var(--rbac-scale));
+  --scan-seam-right-bloom-spread: calc(2px * var(--rbac-scale));
+  --scan-seam-thickness: calc(0.9px * var(--rbac-scale));
 
   /* outer tile */
   --rbac-tile-width: calc(312px * var(--rbac-scale));
@@ -29,7 +29,6 @@
   --rbac-reader-height: calc(158px * var(--rbac-scale));
 
   /* screen */
-  --rbac-screen-left: calc(30px * var(--rbac-scale));
   --rbac-screen-top: calc(3px * var(--rbac-scale));
   --rbac-screen-width: calc(82px * var(--rbac-scale));
   --rbac-screen-height: calc(42px * var(--rbac-scale));
@@ -39,8 +38,6 @@
   --rbac-screen-shell-top: calc(12px * var(--rbac-scale));
 
   /* buttons */
-  --rbac-button-grid-left: calc(120px * var(--rbac-scale));
-  --rbac-button-grid-top: calc(108px * var(--rbac-scale));
   --rbac-button-grid-size: calc(60px * var(--rbac-scale));
   --rbac-button-size: calc(32px * var(--rbac-scale));
   --rbac-button-gap: calc(4px * var(--rbac-scale));
@@ -78,8 +75,8 @@
     );
   color: #252a31;
   box-shadow:
-    0 calc(18px * var(--rbac-scale)) calc(42px * var(--rbac-scale)) rgba(145, 154, 166, 0.10),
-    0 calc(2px * var(--rbac-scale)) calc(10px * var(--rbac-scale)) rgba(126, 135, 145, 0.05);
+    0 calc(14px * var(--rbac-scale)) calc(30px * var(--rbac-scale)) rgba(145, 154, 166, 0.08),
+    0 calc(1px * var(--rbac-scale)) calc(6px * var(--rbac-scale)) rgba(126, 135, 145, 0.045);
 }
 
 .security-card::before,
@@ -100,7 +97,7 @@
     rgba(255, 255, 255, 0.05) 22%
   );
   box-shadow:
-    inset 0 0 0 1px rgba(166, 175, 186, 0.20),
+    inset 0 0 0 1px rgba(166, 175, 186, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.88);
 }
 
@@ -110,7 +107,7 @@
   border-radius: inherit;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.78),
-    inset 0 calc(14px * var(--rbac-scale)) calc(22px * var(--rbac-scale)) rgba(255, 255, 255, 0.11),
+    inset 0 calc(12px * var(--rbac-scale)) calc(18px * var(--rbac-scale)) rgba(255, 255, 255, 0.09),
     inset 0 -1px 0 rgba(138, 146, 156, 0.1);
 }
 
@@ -184,12 +181,12 @@
   transform: translate3d(calc(54px * var(--rbac-scale)), 0, 0);
   border-radius: calc(9px * var(--rbac-scale));
   background: rgba(218, 226, 236, 0.6);
-  backdrop-filter: blur(calc(4px * var(--rbac-scale)));
-  -webkit-backdrop-filter: blur(calc(4px * var(--rbac-scale)));
+  backdrop-filter: blur(calc(2px * var(--rbac-scale)));
+  -webkit-backdrop-filter: blur(calc(2px * var(--rbac-scale)));
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.62),
-    inset 0 calc(1px * var(--rbac-scale)) 0 rgba(255, 255, 255, 0.36),
-    0 calc(2px * var(--rbac-scale)) calc(8px * var(--rbac-scale)) rgba(145, 154, 166, 0.10);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.54),
+    inset 0 calc(1px * var(--rbac-scale)) 0 rgba(255, 255, 255, 0.24),
+    0 calc(1px * var(--rbac-scale)) calc(5px * var(--rbac-scale)) rgba(145, 154, 166, 0.08);
   pointer-events: none;
   user-select: none;
   will-change: transform;
@@ -201,9 +198,9 @@
   border-radius: inherit;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.26) 0%,
-    rgba(255, 255, 255, 0.12) 24%,
-    rgba(255, 255, 255, 0.05) 46%,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.09) 24%,
+    rgba(255, 255, 255, 0.03) 46%,
     rgba(255, 255, 255, 0.01) 68%,
     rgba(255, 255, 255, 0) 100%
   );
@@ -218,7 +215,7 @@
   border-radius: calc(4px * var(--rbac-scale));
   background: rgba(255, 255, 255, 0.92);
   box-shadow:
-    inset 0 0 0 1px rgba(193, 201, 210, 0.42),
+    inset 0 0 0 1px rgba(193, 201, 210, 0.36),
     0 0 0 1px rgba(255, 255, 255, 0.26);
 }
 
@@ -245,14 +242,14 @@
   border-radius: 999px;
   background: linear-gradient(
     180deg,
-    rgba(136, 205, 255, 0.52) 0%,
+    rgba(146, 211, 255, 0.44) 0%,
     var(--scan-seam-core-color) 18%,
-    rgba(176, 218, 255, 0.94) 82%,
-    rgba(122, 191, 255, 0.46) 100%
+    rgba(176, 218, 255, 0.88) 82%,
+    rgba(122, 191, 255, 0.34) 100%
   );
   box-shadow:
-    0 0 calc(1.25px * var(--rbac-scale)) rgba(180, 224, 255, 0.18),
-    0 0 calc(3.4px * var(--rbac-scale)) rgba(116, 199, 255, 0.08);
+    0 0 calc(0.9px * var(--rbac-scale)) rgba(180, 224, 255, 0.18),
+    0 0 calc(2px * var(--rbac-scale)) rgba(116, 199, 255, 0.06);
   opacity: var(--scan-seam-core-opacity);
 }
 
@@ -265,13 +262,13 @@
   background: linear-gradient(
     90deg,
     rgba(116, 199, 255, 0) 0%,
-    rgba(116, 199, 255, 0.14) 22%,
+    rgba(116, 199, 255, 0.08) 22%,
     var(--scan-seam-glow-color-a) 62%,
     var(--scan-seam-glow-color-b) 82%,
-    rgba(111, 228, 255, 0.03) 100%
+    rgba(111, 228, 255, 0.02) 100%
   );
   transform: translateX(calc(-1 * var(--scan-seam-left-bloom-spread)));
-  filter: blur(calc(2px * var(--rbac-scale)));
+  filter: blur(calc(1.4px * var(--rbac-scale)));
   opacity: var(--scan-seam-bloom-opacity);
 }
 
@@ -291,13 +288,13 @@
   height: 100%;
   border-radius: calc(12px * var(--rbac-scale));
   background: rgba(229, 235, 242, 1);
-  backdrop-filter: blur(calc(5px * var(--rbac-scale)));
-  -webkit-backdrop-filter: blur(calc(5px * var(--rbac-scale)));
+  backdrop-filter: blur(calc(2px * var(--rbac-scale)));
+  -webkit-backdrop-filter: blur(calc(2px * var(--rbac-scale)));
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.72),
-    inset 0 calc(1px * var(--rbac-scale)) 0 rgba(255, 255, 255, 0.74),
-    inset 0 calc(-10px * var(--rbac-scale)) calc(18px * var(--rbac-scale)) rgba(190, 198, 208, 0.08),
-    0 calc(1px * var(--rbac-scale)) calc(3px * var(--rbac-scale)) rgba(132, 140, 151, 0.05);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.66),
+    inset 0 calc(1px * var(--rbac-scale)) 0 rgba(255, 255, 255, 0.62),
+    inset 0 calc(-8px * var(--rbac-scale)) calc(14px * var(--rbac-scale)) rgba(190, 198, 208, 0.07),
+    0 calc(1px * var(--rbac-scale)) calc(2px * var(--rbac-scale)) rgba(132, 140, 151, 0.04);
 }
 
 .security-rbac__screen-shell {
@@ -340,14 +337,13 @@
   padding: 0 calc(4px * var(--rbac-scale));
   box-sizing: border-box;
   color: rgb(232, 236, 242);
-  font-family: "Courier New", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+  font-family: "SFMono-Regular", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
   font-size: calc(11.6px * var(--rbac-scale));
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
   letter-spacing: calc(0.78px * var(--rbac-scale));
   text-align: center;
-  text-shadow: 0 0 calc(2px * var(--rbac-scale)) rgba(245, 247, 250, 0.10);
   text-transform: uppercase;
   opacity: 0.78;
   white-space: nowrap;
@@ -390,7 +386,7 @@
   box-shadow:
     inset 0 0 0 1px rgba(188, 196, 206, 0.82),
     inset 0 calc(1px * var(--rbac-scale)) 0 rgba(255, 255, 255, 0.62),
-    inset 0 calc(-3px * var(--rbac-scale)) calc(8px * var(--rbac-scale)) rgba(181, 189, 198, 0.05);
+    inset 0 calc(-2px * var(--rbac-scale)) calc(6px * var(--rbac-scale)) rgba(181, 189, 198, 0.04);
 }
 
 .security-rbac__button-shape {
@@ -404,7 +400,7 @@
   transform: translate(-50%, -50%);
   color: rgb(146, 154, 164);
   opacity: 0.30;
-  filter: drop-shadow(0 0 calc(1px * var(--rbac-scale)) rgba(255, 255, 255, 0.56));
+  filter: none;
 }
 
 .security-rbac__button-shape svg {
@@ -417,11 +413,11 @@
   position: relative;
   z-index: 2;
   width: 100%;
-  padding-bottom: calc(22px * var(--rbac-scale));
+  padding-bottom: calc(18px * var(--rbac-scale));
   color: rgba(101, 109, 120, 0.96);
-  font-size: calc(15.5px * var(--rbac-scale));
+  font-size: calc(14.6px * var(--rbac-scale));
   font-weight: 430;
-  line-height: calc(23px * var(--rbac-scale));
+  line-height: calc(21px * var(--rbac-scale));
   text-align: center;
   letter-spacing: -0.01em;
 }
